@@ -31,15 +31,10 @@
     }
   </script>
   <script>
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-const _React = React,
-  useState = _React.useState,
-  useEffect = _React.useEffect;
+const {
+  useState,
+  useEffect
+} = React;
 function usePersistedState(k, d) {
   var lk = "tog_" + k;
   var _s = React.useState(function () {
@@ -182,7 +177,7 @@ const DEFAULT_SETTINGS = {
     name: "Touch of Grace Kitchen Ltd.",
     address: "Sparwood Recreation Centre, Sparwood, BC V0B 2G0",
     phone: "+1 (250) 433-7372",
-    email: "mcdonna6@hotmail.com",
+    email: "",
     gstNumber: "",
     pstNumber: "",
     established: "2026"
@@ -1359,165 +1354,147 @@ const elapsed = ts => {
 };
 
 // -- UI ATOMS -----------------------------------------------------------------
-const Badge = _ref => {
-  let children = _ref.children,
-    _ref$color = _ref.color,
-    color = _ref$color === void 0 ? C.gold : _ref$color,
-    _ref$small = _ref.small,
-    small = _ref$small === void 0 ? false : _ref$small;
-  return /*#__PURE__*/React.createElement("span", {
-    style: {
-      background: color + "22",
-      color,
-      border: "1px solid " + color + "55",
-      borderRadius: 20,
-      padding: small ? "1px 7px" : "2px 10px",
-      fontSize: small ? 10 : 11,
-      fontWeight: 700,
-      whiteSpace: "nowrap"
-    }
-  }, children);
-};
-const Card = _ref2 => {
-  let children = _ref2.children,
-    _ref2$style = _ref2.style,
-    style = _ref2$style === void 0 ? {} : _ref2$style;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.white,
-      borderRadius: 12,
-      border: "1px solid " + C.border,
-      padding: 20,
-      ...style
-    }
-  }, children);
-};
-const Inp = _ref3 => {
-  let value = _ref3.value,
-    onChange = _ref3.onChange,
-    placeholder = _ref3.placeholder,
-    _ref3$type = _ref3.type,
-    type = _ref3$type === void 0 ? "text" : _ref3$type,
-    _ref3$style = _ref3.style,
-    style = _ref3$style === void 0 ? {} : _ref3$style;
-  return /*#__PURE__*/React.createElement("input", {
-    type: type,
-    value: value,
-    onChange: e => onChange(e.target.value),
-    placeholder: placeholder,
-    style: {
-      border: "1px solid " + C.border,
-      borderRadius: 8,
-      padding: "8px 12px",
-      fontSize: 13,
-      width: "100%",
-      outline: "none",
-      background: C.cream,
-      color: C.dark,
-      boxSizing: "border-box",
-      ...style
-    }
-  });
-};
-const Sel = _ref4 => {
-  let value = _ref4.value,
-    onChange = _ref4.onChange,
-    options = _ref4.options,
-    _ref4$style = _ref4.style,
-    style = _ref4$style === void 0 ? {} : _ref4$style;
-  return /*#__PURE__*/React.createElement("select", {
-    value: value,
-    onChange: e => onChange(e.target.value),
-    style: {
-      border: "1px solid " + C.border,
-      borderRadius: 8,
-      padding: "8px 12px",
-      fontSize: 13,
-      background: C.cream,
-      color: C.dark,
-      outline: "none",
-      ...style
-    }
-  }, options.map(o => /*#__PURE__*/React.createElement("option", {
-    key: o,
-    value: o
-  }, o)));
-};
-const Btn = _ref5 => {
-  let children = _ref5.children,
-    onClick = _ref5.onClick,
-    _ref5$color = _ref5.color,
-    color = _ref5$color === void 0 ? C.green : _ref5$color,
-    _ref5$small = _ref5.small,
-    small = _ref5$small === void 0 ? false : _ref5$small,
-    _ref5$outline = _ref5.outline,
-    outline = _ref5$outline === void 0 ? false : _ref5$outline,
-    _ref5$style = _ref5.style,
-    style = _ref5$style === void 0 ? {} : _ref5$style;
-  return /*#__PURE__*/React.createElement("button", {
-    onClick: onClick,
-    style: {
-      background: outline ? "transparent" : color,
-      color: outline ? color : C.white,
-      border: "2px solid " + color,
-      borderRadius: 8,
-      padding: small ? "4px 11px" : "9px 18px",
-      fontSize: small ? 11 : 13,
-      fontWeight: 700,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      whiteSpace: "nowrap",
-      ...style
-    }
-  }, children);
-};
-const Stat = _ref6 => {
-  let icon = _ref6.icon,
-    label = _ref6.label,
-    val = _ref6.val,
-    _ref6$color = _ref6.color,
-    color = _ref6$color === void 0 ? C.green : _ref6$color,
-    sub = _ref6.sub;
-  return /*#__PURE__*/React.createElement(Card, {
-    style: {
-      textAlign: "center",
-      background: C.lightGold
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 20
-    }
-  }, icon), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 22,
-      fontWeight: 800,
-      color
-    }
-  }, val), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.charcoal
-    }
-  }, label), sub && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.gray,
-      marginTop: 2
-    }
-  }, sub));
-};
-const SH = _ref7 => {
-  let children = _ref7.children;
-  return /*#__PURE__*/React.createElement("h3", {
-    style: {
-      margin: "0 0 14px",
-      color: C.darkGold,
-      fontSize: 15,
-      borderBottom: "2px solid " + C.border,
-      paddingBottom: 8
-    }
-  }, children);
-};
+const Badge = ({
+  children,
+  color = C.gold,
+  small = false
+}) => /*#__PURE__*/React.createElement("span", {
+  style: {
+    background: color + "22",
+    color,
+    border: "1px solid " + color + "55",
+    borderRadius: 20,
+    padding: small ? "1px 7px" : "2px 10px",
+    fontSize: small ? 10 : 11,
+    fontWeight: 700,
+    whiteSpace: "nowrap"
+  }
+}, children);
+const Card = ({
+  children,
+  style = {}
+}) => /*#__PURE__*/React.createElement("div", {
+  style: {
+    background: C.white,
+    borderRadius: 12,
+    border: "1px solid " + C.border,
+    padding: 20,
+    ...style
+  }
+}, children);
+const Inp = ({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  style = {}
+}) => /*#__PURE__*/React.createElement("input", {
+  type: type,
+  value: value,
+  onChange: e => onChange(e.target.value),
+  placeholder: placeholder,
+  style: {
+    border: "1px solid " + C.border,
+    borderRadius: 8,
+    padding: "8px 12px",
+    fontSize: 13,
+    width: "100%",
+    outline: "none",
+    background: C.cream,
+    color: C.dark,
+    boxSizing: "border-box",
+    ...style
+  }
+});
+const Sel = ({
+  value,
+  onChange,
+  options,
+  style = {}
+}) => /*#__PURE__*/React.createElement("select", {
+  value: value,
+  onChange: e => onChange(e.target.value),
+  style: {
+    border: "1px solid " + C.border,
+    borderRadius: 8,
+    padding: "8px 12px",
+    fontSize: 13,
+    background: C.cream,
+    color: C.dark,
+    outline: "none",
+    ...style
+  }
+}, options.map(o => /*#__PURE__*/React.createElement("option", {
+  key: o,
+  value: o
+}, o)));
+const Btn = ({
+  children,
+  onClick,
+  color = C.green,
+  small = false,
+  outline = false,
+  style = {}
+}) => /*#__PURE__*/React.createElement("button", {
+  onClick: onClick,
+  style: {
+    background: outline ? "transparent" : color,
+    color: outline ? color : C.white,
+    border: "2px solid " + color,
+    borderRadius: 8,
+    padding: small ? "4px 11px" : "9px 18px",
+    fontSize: small ? 11 : 13,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    whiteSpace: "nowrap",
+    ...style
+  }
+}, children);
+const Stat = ({
+  icon,
+  label,
+  val,
+  color = C.green,
+  sub
+}) => /*#__PURE__*/React.createElement(Card, {
+  style: {
+    textAlign: "center",
+    background: C.lightGold
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 20
+  }
+}, icon), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 22,
+    fontWeight: 800,
+    color
+  }
+}, val), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 11,
+    color: C.charcoal
+  }
+}, label), sub && /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 10,
+    color: C.gray,
+    marginTop: 2
+  }
+}, sub));
+const SH = ({
+  children
+}) => /*#__PURE__*/React.createElement("h3", {
+  style: {
+    margin: "0 0 14px",
+    color: C.darkGold,
+    fontSize: 15,
+    borderBottom: "2px solid " + C.border,
+    paddingBottom: 8
+  }
+}, children);
 
 // -- LOADING ------------------------------------------------------------------
 function LoadingScreen() {
@@ -1542,7 +1519,7 @@ function LoadingScreen() {
       justifyContent: "center",
       fontSize: 28
     }
-  }, "\uD83C\uDF7D"), /*#__PURE__*/React.createElement("div", {
+  }, "🍽"), /*#__PURE__*/React.createElement("div", {
     style: {
       color: C.gold,
       fontWeight: 800,
@@ -1559,21 +1536,16 @@ function LoadingScreen() {
 
 // -- MANAGER PIN MODAL --------------------------------------------------------
 // permission: "authorizeDiscounts" | "authorizeRefunds" | "manageMenu" | etc.
-function ManagerPINModal(_ref8) {
-  let staff = _ref8.staff,
-    positions = _ref8.positions,
-    permission = _ref8.permission,
-    action = _ref8.action,
-    onSuccess = _ref8.onSuccess,
-    onCancel = _ref8.onCancel;
-  const _useState = useState(""),
-    _useState2 = _slicedToArray(_useState, 2),
-    pin = _useState2[0],
-    setPin = _useState2[1];
-  const _useState3 = useState(""),
-    _useState4 = _slicedToArray(_useState3, 2),
-    error = _useState4[0],
-    setError = _useState4[1];
+function ManagerPINModal({
+  staff,
+  positions,
+  permission,
+  action,
+  onSuccess,
+  onCancel
+}) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
 
   // Find staff members whose position has this permission
   const authorized = (staff || []).filter(s => {
@@ -1617,7 +1589,7 @@ function ManagerPINModal(_ref8) {
       fontSize: 22,
       marginBottom: 6
     }
-  }, "\uD83D\uDD12"), /*#__PURE__*/React.createElement("div", {
+  }, "🔒"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontWeight: 800,
       fontSize: 16,
@@ -1673,10 +1645,11 @@ function ManagerPINModal(_ref8) {
 }
 
 // -- CUSTOMIZATION MODAL ------------------------------------------------------
-function CustomizeModal(_ref9) {
-  let item = _ref9.item,
-    onConfirm = _ref9.onConfirm,
-    onCancel = _ref9.onCancel;
+function CustomizeModal({
+  item,
+  onConfirm,
+  onCancel
+}) {
   const groups = item.customGroups || [];
   // selections[groupId] = chosen option name
   const initSelections = () => {
@@ -1686,14 +1659,8 @@ function CustomizeModal(_ref9) {
     });
     return s;
   };
-  const _useState5 = useState(initSelections),
-    _useState6 = _slicedToArray(_useState5, 2),
-    selections = _useState6[0],
-    setSelections = _useState6[1];
-  const _useState7 = useState(""),
-    _useState8 = _slicedToArray(_useState7, 2),
-    request = _useState8[0],
-    setRequest = _useState8[1];
+  const [selections, setSelections] = useState(initSelections);
+  const [request, setRequest] = useState("");
   const extraPrice = groups.reduce((sum, g) => {
     const chosen = g.options.find(o => o.name === selections[g.id]);
     return sum + (chosen ? chosen.price : 0);
@@ -1832,86 +1799,36 @@ function CustomizeModal(_ref9) {
 }
 
 // -- POS TAB ------------------------------------------------------------------
-function POSTab(_ref0) {
-  let menu = _ref0.menu,
-    settings = _ref0.settings,
-    onSaleComplete = _ref0.onSaleComplete,
-    accounts = _ref0.accounts,
-    kitchenOrders = _ref0.kitchenOrders,
-    setKitchenOrders = _ref0.setKitchenOrders,
-    staff = _ref0.staff,
-    positions = _ref0.positions;
-  const _useState9 = useState([]),
-    _useState0 = _slicedToArray(_useState9, 2),
-    order = _useState0[0],
-    setOrder = _useState0[1];
-  const _useState1 = useState(""),
-    _useState10 = _slicedToArray(_useState1, 2),
-    note = _useState10[0],
-    setNote = _useState10[1];
-  const _useState11 = useState("Dine-in"),
-    _useState12 = _slicedToArray(_useState11, 2),
-    orderType = _useState12[0],
-    setOrderType = _useState12[1];
-  const _useState13 = useState("Card Machine"),
-    _useState14 = _slicedToArray(_useState13, 2),
-    payMethod = _useState14[0],
-    setPayMethod = _useState14[1];
-  const _useState15 = useState(""),
-    _useState16 = _slicedToArray(_useState15, 2),
-    cashGiven = _useState16[0],
-    setCashGiven = _useState16[1];
-  const _useState17 = useState(""),
-    _useState18 = _slicedToArray(_useState17, 2),
-    accountId = _useState18[0],
-    setAccountId = _useState18[1];
-  const _useState19 = useState("All"),
-    _useState20 = _slicedToArray(_useState19, 2),
-    filterCat = _useState20[0],
-    setFilterCat = _useState20[1];
-  const _useState21 = useState(null),
-    _useState22 = _slicedToArray(_useState21, 2),
-    customItem = _useState22[0],
-    setCustomItem = _useState22[1];
-  const _useState23 = useState(null),
-    _useState24 = _slicedToArray(_useState23, 2),
-    receipt = _useState24[0],
-    setReceipt = _useState24[1];
-  const _useState25 = useState(() => 100 + Math.floor(Math.random() * 900)),
-    _useState26 = _slicedToArray(_useState25, 2),
-    orderNum = _useState26[0],
-    setOrderNum = _useState26[1];
+function POSTab({
+  menu,
+  settings,
+  onSaleComplete,
+  accounts,
+  kitchenOrders,
+  setKitchenOrders,
+  staff,
+  positions
+}) {
+  const [order, setOrder] = useState([]);
+  const [note, setNote] = useState("");
+  const [orderType, setOrderType] = useState("Dine-in");
+  const [payMethod, setPayMethod] = useState("Card Machine");
+  const [cashGiven, setCashGiven] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [filterCat, setFilterCat] = useState("All");
+  const [customItem, setCustomItem] = useState(null);
+  const [receipt, setReceipt] = useState(null);
+  const [orderNum, setOrderNum] = useState(() => 100 + Math.floor(Math.random() * 900));
   // Discount state
-  const _useState27 = useState(false),
-    _useState28 = _slicedToArray(_useState27, 2),
-    showDiscount = _useState28[0],
-    setShowDiscount = _useState28[1];
-  const _useState29 = useState("percent"),
-    _useState30 = _slicedToArray(_useState29, 2),
-    discountType = _useState30[0],
-    setDiscountType = _useState30[1];
-  const _useState31 = useState(""),
-    _useState32 = _slicedToArray(_useState31, 2),
-    discountValue = _useState32[0],
-    setDiscountValue = _useState32[1];
-  const _useState33 = useState(""),
-    _useState34 = _slicedToArray(_useState33, 2),
-    discountItemIdx = _useState34[0],
-    setDiscountItemIdx = _useState34[1];
+  const [showDiscount, setShowDiscount] = useState(false);
+  const [discountType, setDiscountType] = useState("percent");
+  const [discountValue, setDiscountValue] = useState("");
+  const [discountItemIdx, setDiscountItemIdx] = useState("");
   // Complimentary state
-  const _useState35 = useState(false),
-    _useState36 = _slicedToArray(_useState35, 2),
-    isComp = _useState36[0],
-    setIsComp = _useState36[1];
-  const _useState37 = useState(null),
-    _useState38 = _slicedToArray(_useState37, 2),
-    compAuth = _useState38[0],
-    setCompAuth = _useState38[1];
+  const [isComp, setIsComp] = useState(false);
+  const [compAuth, setCompAuth] = useState(null);
   // Manager PIN gate: "discount" | "complimentary" | null
-  const _useState39 = useState(null),
-    _useState40 = _slicedToArray(_useState39, 2),
-    pinGate = _useState40[0],
-    setPinGate = _useState40[1];
+  const [pinGate, setPinGate] = useState(null);
   const gst = settings.taxes.gst / 100;
   const pst = settings.taxes.pst / 100;
   const cats = ["All", ...Array.from(new Set(menu.filter(m => m.available).map(m => m.cat)))];
@@ -2051,7 +1968,7 @@ function POSTab(_ref0) {
       style: {
         fontSize: 28
       }
-    }, "\u2705"), /*#__PURE__*/React.createElement("div", {
+    }, "✅"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontWeight: 800,
         fontSize: 18,
@@ -2652,17 +2569,12 @@ const K_LABELS = {
   ready: "READY",
   collected: "COLLECTED"
 };
-function KitchenTab(_ref1) {
-  let kitchenOrders = _ref1.kitchenOrders,
-    setKitchenOrders = _ref1.setKitchenOrders;
-  const _useState41 = useState("active"),
-    _useState42 = _slicedToArray(_useState41, 2),
-    filter = _useState42[0],
-    setFilter = _useState42[1];
-  const _useState43 = useState(Date.now()),
-    _useState44 = _slicedToArray(_useState43, 2),
-    lastRefresh = _useState44[0],
-    setLastRefresh = _useState44[1];
+function KitchenTab({
+  kitchenOrders,
+  setKitchenOrders
+}) {
+  const [filter, setFilter] = useState("active");
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
   useEffect(() => {
     const t = setInterval(() => setLastRefresh(Date.now()), 4000);
     return () => clearInterval(t);
@@ -2750,7 +2662,7 @@ function KitchenTab(_ref1) {
       fontSize: 36,
       marginBottom: 12
     }
-  }, "\uD83D\uDCA4"), /*#__PURE__*/React.createElement("div", {
+  }, "💤"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
       color: C.charcoal,
@@ -2891,96 +2803,48 @@ function KitchenTab(_ref1) {
 }
 
 // -- INVENTORY TAB ------------------------------------------------------------
-function InventoryTab(_ref10) {
-  let inventory = _ref10.inventory,
-    setInventory = _ref10.setInventory,
-    settings = _ref10.settings,
-    setSettings = _ref10.setSettings,
-    menu = _ref10.menu,
-    recipes = _ref10.recipes,
-    setRecipes = _ref10.setRecipes,
-    canSeeRecipes = _ref10.canSeeRecipes,
-    countLog = _ref10.countLog,
-    setCountLog = _ref10.setCountLog;
-  const _useState45 = useState("stock"),
-    _useState46 = _slicedToArray(_useState45, 2),
-    section = _useState46[0],
-    setSection = _useState46[1];
-  const _useState47 = useState(""),
-    _useState48 = _slicedToArray(_useState47, 2),
-    search = _useState48[0],
-    setSearch = _useState48[1];
-  const _useState49 = useState(false),
-    _useState50 = _slicedToArray(_useState49, 2),
-    addMode = _useState50[0],
-    setAddMode = _useState50[1];
-  const _useState51 = useState(null),
-    _useState52 = _slicedToArray(_useState51, 2),
-    editId = _useState52[0],
-    setEditId = _useState52[1];
-  const _useState53 = useState({
-      name: "",
-      cat: "Proteins",
-      unit: "kg",
-      stock: "",
-      minStock: ""
-    }),
-    _useState54 = _slicedToArray(_useState53, 2),
-    form = _useState54[0],
-    setForm = _useState54[1];
-  const _useState55 = useState([]),
-    _useState56 = _slicedToArray(_useState55, 2),
-    priceRows = _useState56[0],
-    setPriceRows = _useState56[1];
-  const _useState57 = useState("__pick__"),
-    _useState58 = _slicedToArray(_useState57, 2),
-    pendingSup = _useState58[0],
-    setPendingSup = _useState58[1];
-  const _useState59 = useState(""),
-    _useState60 = _slicedToArray(_useState59, 2),
-    pendingSupN = _useState60[0],
-    setPendingSupN = _useState60[1];
-  const _useState61 = useState(""),
-    _useState62 = _slicedToArray(_useState61, 2),
-    pendingPrice = _useState62[0],
-    setPendingPrice = _useState62[1];
+function InventoryTab({
+  inventory,
+  setInventory,
+  settings,
+  setSettings,
+  menu,
+  recipes,
+  setRecipes,
+  canSeeRecipes,
+  countLog,
+  setCountLog
+}) {
+  const [section, setSection] = useState("stock");
+  const [search, setSearch] = useState("");
+  const [addMode, setAddMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({
+    name: "",
+    cat: "Proteins",
+    unit: "kg",
+    stock: "",
+    minStock: ""
+  });
+  const [priceRows, setPriceRows] = useState([]);
+  const [pendingSup, setPendingSup] = useState("__pick__");
+  const [pendingSupN, setPendingSupN] = useState("");
+  const [pendingPrice, setPendingPrice] = useState("");
   // stock count
-  const _useState63 = useState({}),
-    _useState64 = _slicedToArray(_useState63, 2),
-    physCounts = _useState64[0],
-    setPhysCounts = _useState64[1];
-  const _useState65 = useState(false),
-    _useState66 = _slicedToArray(_useState65, 2),
-    countLocked = _useState66[0],
-    setCountLocked = _useState66[1];
+  const [physCounts, setPhysCounts] = useState({});
+  const [countLocked, setCountLocked] = useState(false);
   // countLog moved to App level
-  const _usePersistedState = usePersistedState("tog-receive-log", []),
-    _usePersistedState2 = _slicedToArray(_usePersistedState, 3),
-    receiveLog = _usePersistedState2[0],
-    setReceiveLog = _usePersistedState2[1],
-    rcvLoaded = _usePersistedState2[2];
-  const _useState67 = useState(false),
-    _useState68 = _slicedToArray(_useState67, 2),
-    receiveMode = _useState68[0],
-    setReceiveMode = _useState68[1];
-  const _useState69 = useState({
-      itemId: null,
-      qty: "",
-      price: "",
-      supplier: ""
-    }),
-    _useState70 = _slicedToArray(_useState69, 2),
-    receiveForm = _useState70[0],
-    setReceiveForm = _useState70[1];
+  const [receiveLog, setReceiveLog, rcvLoaded] = usePersistedState("tog-receive-log", []);
+  const [receiveMode, setReceiveMode] = useState(false);
+  const [receiveForm, setReceiveForm] = useState({
+    itemId: null,
+    qty: "",
+    price: "",
+    supplier: ""
+  });
   // recipe editing
-  const _useState71 = useState(null),
-    _useState72 = _slicedToArray(_useState71, 2),
-    editRecipeId = _useState72[0],
-    setEditRecipeId = _useState72[1];
-  const _useState73 = useState([]),
-    _useState74 = _slicedToArray(_useState73, 2),
-    recipeLines = _useState74[0],
-    setRecipeLines = _useState74[1];
+  const [editRecipeId, setEditRecipeId] = useState(null);
+  const [recipeLines, setRecipeLines] = useState([]);
   const CATS = ["Proteins", "Dry Goods", "Produce", "Pantry", "Spices", "Sides", "Beverages", "Packaging"];
   const allSuppliers = settings.suppliers || [];
   const lowStock = inventory.filter(i => i.stock <= i.minStock);
@@ -3048,15 +2912,10 @@ function InventoryTab(_ref10) {
       stock: item.stock,
       minStock: item.minStock
     });
-    setPriceRows(Object.entries(item.prices || {}).map(_ref11 => {
-      let _ref12 = _slicedToArray(_ref11, 2),
-        sup = _ref12[0],
-        price = _ref12[1];
-      return {
-        sup,
-        price: String(price)
-      };
-    }));
+    setPriceRows(Object.entries(item.prices || {}).map(([sup, price]) => ({
+      sup,
+      price: String(price)
+    })));
     setPendingSup("__pick__");
     setPendingSupN("");
     setPendingPrice("");
@@ -3196,20 +3055,20 @@ function InventoryTab(_ref10) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCE6",
+    icon: "📦",
     label: "Total Items",
     val: inventory.length
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\u26A0",
+    icon: "⚠",
     label: "Low Stock",
     val: lowStock.length,
     color: lowStock.length > 0 ? C.red : C.green
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDE9A",
+    icon: "🚚",
     label: "Suppliers",
     val: allSuppliers.length
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCCB",
+    icon: "📋",
     label: "Recipes Mapped",
     val: Object.keys(recipes).filter(k => (recipes[k] || []).length > 0).length
   })), /*#__PURE__*/React.createElement("div", {
@@ -3218,26 +3077,21 @@ function InventoryTab(_ref10) {
       gap: 8,
       marginBottom: 18
     }
-  }, [["stock", "Stock Levels"], ["count", "Stock Count"], ...(canSeeRecipes ? [["recipes", "Recipe Mapping"]] : [])].map(_ref13 => {
-    let _ref14 = _slicedToArray(_ref13, 2),
-      k = _ref14[0],
-      l = _ref14[1];
-    return /*#__PURE__*/React.createElement("button", {
-      key: k,
-      onClick: () => setSection(k),
-      style: {
-        background: section === k ? C.green : "transparent",
-        color: section === k ? C.white : C.charcoal,
-        border: "2px solid " + (section === k ? C.green : C.border),
-        borderRadius: 8,
-        padding: "8px 18px",
-        fontSize: 13,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        fontWeight: 700
-      }
-    }, l);
-  })), section === "stock" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, [["stock", "Stock Levels"], ["count", "Stock Count"], ...(canSeeRecipes ? [["recipes", "Recipe Mapping"]] : [])].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => setSection(k),
+    style: {
+      background: section === k ? C.green : "transparent",
+      color: section === k ? C.white : C.charcoal,
+      border: "2px solid " + (section === k ? C.green : C.border),
+      borderRadius: 8,
+      padding: "8px 18px",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: 700
+    }
+  }, l))), section === "stock" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 10,
@@ -4109,39 +3963,33 @@ function InventoryTab(_ref10) {
         marginBottom: 16,
         fontSize: 14
       }
-    }, /*#__PURE__*/React.createElement("b", null, item.name), " \u2014 Stock: ", /*#__PURE__*/React.createElement("b", null, item.stock, " ", item.unit), " @ avg ", /*#__PURE__*/React.createElement("b", null, item.avgCost ? fmt(item.avgCost) : "not set", "/", item.unit)), [["Qty received (" + item.unit + ")", "qty", "number"], ["Cost per unit ($)", "price", "number"], ["Supplier", "supplier", "text"]].map(_ref15 => {
-      let _ref16 = _slicedToArray(_ref15, 3),
-        lbl = _ref16[0],
-        f = _ref16[1],
-        t = _ref16[2];
-      return /*#__PURE__*/React.createElement("div", {
-        key: f,
-        style: {
-          marginBottom: 12
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 12,
-          color: C.charcoal,
-          marginBottom: 4
-        }
-      }, lbl), /*#__PURE__*/React.createElement("input", {
-        type: t,
-        value: receiveForm[f],
-        onChange: e => setReceiveForm({
-          ...receiveForm,
-          [f]: e.target.value
-        }),
-        style: {
-          width: "100%",
-          padding: "8px 10px",
-          border: "1px solid " + C.border,
-          borderRadius: 6,
-          fontSize: 14
-        },
-        step: "0.01"
-      }));
-    }), receiveForm.qty && receiveForm.price && !isNaN(parseFloat(receiveForm.qty)) && !isNaN(parseFloat(receiveForm.price)) && (() => {
+    }, /*#__PURE__*/React.createElement("b", null, item.name), " — Stock: ", /*#__PURE__*/React.createElement("b", null, item.stock, " ", item.unit), " @ avg ", /*#__PURE__*/React.createElement("b", null, item.avgCost ? fmt(item.avgCost) : "not set", "/", item.unit)), [["Qty received (" + item.unit + ")", "qty", "number"], ["Cost per unit ($)", "price", "number"], ["Supplier", "supplier", "text"]].map(([lbl, f, t]) => /*#__PURE__*/React.createElement("div", {
+      key: f,
+      style: {
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: C.charcoal,
+        marginBottom: 4
+      }
+    }, lbl), /*#__PURE__*/React.createElement("input", {
+      type: t,
+      value: receiveForm[f],
+      onChange: e => setReceiveForm({
+        ...receiveForm,
+        [f]: e.target.value
+      }),
+      style: {
+        width: "100%",
+        padding: "8px 10px",
+        border: "1px solid " + C.border,
+        borderRadius: 6,
+        fontSize: 14
+      },
+      step: "0.01"
+    }))), receiveForm.qty && receiveForm.price && !isNaN(parseFloat(receiveForm.qty)) && !isNaN(parseFloat(receiveForm.price)) && (() => {
       const q = parseFloat(receiveForm.qty),
         p = parseFloat(receiveForm.price),
         os = item.stock || 0,
@@ -4174,34 +4022,26 @@ function InventoryTab(_ref10) {
 }
 
 // -- EXPENSES TAB -------------------------------------------------------------
-function ExpensesTab(_ref17) {
-  let expenses = _ref17.expenses,
-    setExpenses = _ref17.setExpenses,
-    settings = _ref17.settings;
+function ExpensesTab({
+  expenses,
+  setExpenses,
+  settings
+}) {
   const CATS = settings.expenseCategories || ["Lease", "Insurance", "Food & Inventory", "Supplies", "Marketing", "Utilities", "Staff Wages", "Licensing", "Other"];
   const CAT_PALETTE = [C.green, C.gold, C.darkGold, C.lightGreen, C.purple, C.blue, C.orange, "#AD1457", C.charcoal, C.teal, C.red, "#795548", "#607D8B"];
   const catColor = cat => {
     const idx = CATS.indexOf(cat);
     return idx >= 0 ? CAT_PALETTE[idx % CAT_PALETTE.length] : C.charcoal;
   };
-  const _useState75 = useState({
-      date: today(),
-      cat: CATS[0] || "Other",
-      desc: "",
-      amount: "",
-      supplier: ""
-    }),
-    _useState76 = _slicedToArray(_useState75, 2),
-    form = _useState76[0],
-    setForm = _useState76[1];
-  const _useState77 = useState(false),
-    _useState78 = _slicedToArray(_useState77, 2),
-    addMode = _useState78[0],
-    setAddMode = _useState78[1];
-  const _useState79 = useState(today().slice(0, 7)),
-    _useState80 = _slicedToArray(_useState79, 2),
-    filterMonth = _useState80[0],
-    setFilterMonth = _useState80[1];
+  const [form, setForm] = useState({
+    date: today(),
+    cat: CATS[0] || "Other",
+    desc: "",
+    amount: "",
+    supplier: ""
+  });
+  const [addMode, setAddMode] = useState(false);
+  const [filterMonth, setFilterMonth] = useState(today().slice(0, 7));
   const filtered = expenses.filter(e => e.date.startsWith(filterMonth));
   const total = filtered.reduce((s, e) => s + e.amount, 0);
   const CAT_COLORS = {};
@@ -4267,23 +4107,22 @@ function ExpensesTab(_ref17) {
       fontSize: 12,
       color: C.gray
     }
-  }, "No expenses this month."), byCat.map(_ref18 => {
-    let c = _ref18.c,
-      t = _ref18.t;
-    return /*#__PURE__*/React.createElement("div", {
-      key: c,
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 3,
-        fontSize: 13
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: CAT_COLORS[c] || C.charcoal
-      }
-    }, "* ", c), /*#__PURE__*/React.createElement("strong", null, fmt(t)));
-  }))), /*#__PURE__*/React.createElement("div", {
+  }, "No expenses this month."), byCat.map(({
+    c,
+    t
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: c,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 3,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: CAT_COLORS[c] || C.charcoal
+    }
+  }, "* ", c), /*#__PURE__*/React.createElement("strong", null, fmt(t)))))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#E8F5E9",
       border: "1px solid " + C.lightGreen,
@@ -4466,39 +4305,19 @@ function ExpensesTab(_ref17) {
 }
 
 // -- STAFF TAB ----------------------------------------------------------------
-function StaffTab(_ref19) {
-  let staff = _ref19.staff,
-    setStaff = _ref19.setStaff,
-    positions = _ref19.positions;
-  const loaded = true; // staff is passed from App (already loaded)
-  const _useState81 = useState(false),
-    _useState82 = _slicedToArray(_useState81, 2),
-    addMode = _useState82[0],
-    setAddMode = _useState82[1];
-  const _useState83 = useState(null),
-    _useState84 = _slicedToArray(_useState83, 2),
-    editId = _useState84[0],
-    setEditId = _useState84[1];
-  const _useState85 = useState(false),
-    _useState86 = _slicedToArray(_useState85, 2),
-    showPin = _useState86[0],
-    setShowPin = _useState86[1];
-  const _useState87 = useState(null),
-    _useState88 = _slicedToArray(_useState87, 2),
-    pinModal = _useState88[0],
-    setPinModal = _useState88[1];
-  const _useState89 = useState(""),
-    _useState90 = _slicedToArray(_useState89, 2),
-    pinInput = _useState90[0],
-    setPinInput = _useState90[1];
-  const _useState91 = useState(""),
-    _useState92 = _slicedToArray(_useState91, 2),
-    pinError = _useState92[0],
-    setPinError = _useState92[1];
-  const _useState93 = useState("bi-weekly"),
-    _useState94 = _slicedToArray(_useState93, 2),
-    payPeriod = _useState94[0],
-    setPayPeriod = _useState94[1];
+function StaffTab({
+  staff,
+  setStaff,
+  positions
+}) {
+  const [loaded] = [true]; // staff is passed from App (already loaded)
+  const [addMode, setAddMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [showPin, setShowPin] = useState(false);
+  const [pinModal, setPinModal] = useState(null);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [payPeriod, setPayPeriod] = useState("bi-weekly");
   const blankForm = {
     name: "",
     role: "",
@@ -4509,10 +4328,7 @@ function StaffTab(_ref19) {
     startDate: today(),
     positionId: 3
   };
-  const _useState95 = useState(blankForm),
-    _useState96 = _slicedToArray(_useState95, 2),
-    form = _useState96[0],
-    setForm = _useState96[1];
+  const [form, setForm] = useState(blankForm);
   const mult = payPeriod === "weekly" ? 1 : payPeriod === "bi-weekly" ? 2 : 4;
   const payrollTotal = staff.filter(s => s.type !== "Owner").reduce((sum, s) => sum + s.hourlyRate * s.hoursPerWeek * mult, 0);
   const getPos = s => (positions || POSITIONS_INIT).find(p => p.id === s.positionId) || {
@@ -4912,21 +4728,21 @@ function StaffTab(_ref19) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDC65",
+    icon: "👥",
     label: "Total Staff",
     val: staff.length
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDFE2",
+    icon: "🟢",
     label: "Clocked In",
     val: staff.filter(s => s.clockedIn).length,
     color: C.green
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCC5",
+    icon: "📅",
     label: "Pay Period",
     val: payPeriod,
     color: C.blue
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB0",
+    icon: "💰",
     label: "Payroll Est.",
     val: fmt(payrollTotal),
     color: C.red
@@ -5183,56 +4999,30 @@ function StaffTab(_ref19) {
 }
 
 // -- ACCOUNTS TAB -------------------------------------------------------------
-function AccountsTab(_ref20) {
-  let accounts = _ref20.accounts,
-    setAccounts = _ref20.setAccounts,
-    sales = _ref20.sales;
-  const _useState97 = useState(null),
-    _useState98 = _slicedToArray(_useState97, 2),
-    selected = _useState98[0],
-    setSelected = _useState98[1];
-  const _useState99 = useState(false),
-    _useState100 = _slicedToArray(_useState99, 2),
-    addMode = _useState100[0],
-    setAddMode = _useState100[1];
-  const _useState101 = useState("orders"),
-    _useState102 = _slicedToArray(_useState101, 2),
-    view = _useState102[0],
-    setView = _useState102[1];
-  const _useState103 = useState({
-      from: today().slice(0, 7) + "-01",
-      to: today()
-    }),
-    _useState104 = _slicedToArray(_useState103, 2),
-    invoiceRange = _useState104[0],
-    setInvoiceRange = _useState104[1];
-  const _useState105 = useState({
-      name: "",
-      contact: "",
-      phone: "",
-      email: "",
-      billingCycle: "weekly",
-      notes: ""
-    }),
-    _useState106 = _slicedToArray(_useState105, 2),
-    form = _useState106[0],
-    setForm = _useState106[1];
-  const _useState107 = useState(""),
-    _useState108 = _slicedToArray(_useState107, 2),
-    pmtAmount = _useState108[0],
-    setPmtAmount = _useState108[1];
-  const _useState109 = useState("Transfer"),
-    _useState110 = _slicedToArray(_useState109, 2),
-    pmtMethod = _useState110[0],
-    setPmtMethod = _useState110[1];
-  const _useState111 = useState(""),
-    _useState112 = _slicedToArray(_useState111, 2),
-    pmtNote = _useState112[0],
-    setPmtNote = _useState112[1];
-  const _useState113 = useState(false),
-    _useState114 = _slicedToArray(_useState113, 2),
-    pmtSaved = _useState114[0],
-    setPmtSaved = _useState114[1];
+function AccountsTab({
+  accounts,
+  setAccounts,
+  sales
+}) {
+  const [selected, setSelected] = useState(null);
+  const [addMode, setAddMode] = useState(false);
+  const [view, setView] = useState("orders");
+  const [invoiceRange, setInvoiceRange] = useState({
+    from: today().slice(0, 7) + "-01",
+    to: today()
+  });
+  const [form, setForm] = useState({
+    name: "",
+    contact: "",
+    phone: "",
+    email: "",
+    billingCycle: "weekly",
+    notes: ""
+  });
+  const [pmtAmount, setPmtAmount] = useState("");
+  const [pmtMethod, setPmtMethod] = useState("Transfer");
+  const [pmtNote, setPmtNote] = useState("");
+  const [pmtSaved, setPmtSaved] = useState(false);
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
   const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
   const totalOwed = acc => pendingOrders(acc).reduce((s, o) => s + o.total, 0);
@@ -5428,7 +5218,7 @@ function AccountsTab(_ref20) {
     style: {
       fontSize: 40
     }
-  }, "\uD83D\uDCCB"), /*#__PURE__*/React.createElement("div", {
+  }, "📋"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
       fontWeight: 700
@@ -5896,7 +5686,23 @@ function AccountsTab(_ref20) {
       color: C.charcoal,
       marginTop: 12
     }
-  }, "Please remit payment within 7 days. E-transfer to ", acc.email || "mcdonna6@hotmail.com", ".")), invoiceOrders.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, (settings.business || {}).paymentInstructions || "Please update payment instructions in Settings → Business Information."), (settings.business || {}).cateringTerms && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      padding: "10px 14px",
+      background: C.cream,
+      borderRadius: 6,
+      fontSize: 11,
+      color: C.charcoal,
+      borderTop: "1px solid " + C.border
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      marginBottom: 4,
+      fontSize: 12
+    }
+  }, "Terms & Conditions"), (settings.business || {}).cateringTerms)), invoiceOrders.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
       display: "flex",
@@ -5915,84 +5721,43 @@ function AccountsTab(_ref20) {
 }
 
 // -- CATERING TAB -------------------------------------------------------------
-function CateringTab(_ref21) {
-  let cateringEvents = _ref21.cateringEvents,
-    setCateringEvents = _ref21.setCateringEvents,
-    menu = _ref21.menu,
-    recipes = _ref21.recipes,
-    inventory = _ref21.inventory,
-    setInventory = _ref21.setInventory;
-  const _useState115 = useState(null),
-    _useState116 = _slicedToArray(_useState115, 2),
-    selId = _useState116[0],
-    setSelId = _useState116[1];
-  const _useState117 = useState("details"),
-    _useState118 = _slicedToArray(_useState117, 2),
-    catSec = _useState118[0],
-    setCatSec = _useState118[1];
-  const _useState119 = useState(false),
-    _useState120 = _slicedToArray(_useState119, 2),
-    addMode = _useState120[0],
-    setAddMode = _useState120[1];
-  const _useState121 = useState({
-      eventName: "",
-      clientName: "",
-      clientPhone: "",
-      clientEmail: "",
-      eventDate: "",
-      guestCount: "",
-      venue: "",
-      notes: "",
-      deliveryNeeded: false,
-      quoteExpiry: "",
-      quoteNumber: "Q-" + (100 + Math.floor(Math.random() * 900)),
-      serviceChargePct: 0,
-      discountType: "none",
-      discountValue: 0
-    }),
-    _useState122 = _slicedToArray(_useState121, 2),
-    newForm = _useState122[0],
-    setNewForm = _useState122[1];
-  const _useState123 = useState(""),
-    _useState124 = _slicedToArray(_useState123, 2),
-    pickMenuId = _useState124[0],
-    setPickMenuId = _useState124[1];
-  const _useState125 = useState("1"),
-    _useState126 = _slicedToArray(_useState125, 2),
-    pickQty = _useState126[0],
-    setPickQty = _useState126[1];
-  const _useState127 = useState(""),
-    _useState128 = _slicedToArray(_useState127, 2),
-    pickPrice = _useState128[0],
-    setPickPrice = _useState128[1];
-  const _useState129 = useState(""),
-    _useState130 = _slicedToArray(_useState129, 2),
-    pickNote = _useState130[0],
-    setPickNote = _useState130[1];
-  const _useState131 = useState(false),
-    _useState132 = _slicedToArray(_useState131, 2),
-    showAddItem = _useState132[0],
-    setShowAddItem = _useState132[1];
-  const _useState133 = useState(""),
-    _useState134 = _slicedToArray(_useState133, 2),
-    pmtAmount = _useState134[0],
-    setPmtAmount = _useState134[1];
-  const _useState135 = useState("Transfer"),
-    _useState136 = _slicedToArray(_useState135, 2),
-    pmtMethod = _useState136[0],
-    setPmtMethod = _useState136[1];
-  const _useState137 = useState(""),
-    _useState138 = _slicedToArray(_useState137, 2),
-    pmtNote = _useState138[0],
-    setPmtNote = _useState138[1];
-  const _useState139 = useState(false),
-    _useState140 = _slicedToArray(_useState139, 2),
-    pmtSaved = _useState140[0],
-    setPmtSaved = _useState140[1];
-  const _useState141 = useState(false),
-    _useState142 = _slicedToArray(_useState141, 2),
-    deductConf = _useState142[0],
-    setDeductConf = _useState142[1];
+function CateringTab({
+  cateringEvents,
+  setCateringEvents,
+  menu,
+  recipes,
+  inventory,
+  setInventory
+}) {
+  const [selId, setSelId] = useState(null);
+  const [catSec, setCatSec] = useState("details");
+  const [addMode, setAddMode] = useState(false);
+  const [newForm, setNewForm] = useState({
+    eventName: "",
+    clientName: "",
+    clientPhone: "",
+    clientEmail: "",
+    eventDate: "",
+    guestCount: "",
+    venue: "",
+    notes: "",
+    deliveryNeeded: false,
+    quoteExpiry: "",
+    quoteNumber: "Q-" + (100 + Math.floor(Math.random() * 900)),
+    serviceChargePct: 0,
+    discountType: "none",
+    discountValue: 0
+  });
+  const [pickMenuId, setPickMenuId] = useState("");
+  const [pickQty, setPickQty] = useState("1");
+  const [pickPrice, setPickPrice] = useState("");
+  const [pickNote, setPickNote] = useState("");
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [pmtAmount, setPmtAmount] = useState("");
+  const [pmtMethod, setPmtMethod] = useState("Transfer");
+  const [pmtNote, setPmtNote] = useState("");
+  const [pmtSaved, setPmtSaved] = useState(false);
+  const [deductConf, setDeductConf] = useState(false);
   const ev = selId ? cateringEvents.find(e => e.id === selId) : null;
   const updateEv = updates => setCateringEvents(prev => prev.map(e => e.id === selId ? {
     ...e,
@@ -6140,11 +5905,11 @@ function CateringTab(_ref21) {
       marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83C\uDF7D",
+    icon: "🍽",
     label: "Events",
     val: cateringEvents.length
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCCB",
+    icon: "📋",
     label: "Confirmed",
     val: confirmed.length,
     color: C.green
@@ -6313,7 +6078,7 @@ function CateringTab(_ref21) {
     style: {
       fontSize: 40
     }
-  }, "\uD83C\uDF7D"), /*#__PURE__*/React.createElement("div", {
+  }, "🍽"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
       fontWeight: 700
@@ -6393,52 +6158,42 @@ function CateringTab(_ref21) {
       marginBottom: 14,
       flexWrap: "wrap"
     }
-  }, [["details", "Details"], ["order", "Order Builder"], ["production", "Production Sheet"], ["quote", "Quote / Invoice"], ["payments", "Payments"]].map(_ref22 => {
-    let _ref23 = _slicedToArray(_ref22, 2),
-      k = _ref23[0],
-      l = _ref23[1];
-    return /*#__PURE__*/React.createElement("button", {
-      key: k,
-      onClick: () => setCatSec(k),
-      style: {
-        background: catSec === k ? C.green : "transparent",
-        color: catSec === k ? C.white : C.charcoal,
-        border: "2px solid " + (catSec === k ? C.green : C.border),
-        borderRadius: 8,
-        padding: "7px 14px",
-        fontSize: 12,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        fontWeight: 700
-      }
-    }, l);
-  })), catSec === "details" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Event Details"), /*#__PURE__*/React.createElement("div", {
+  }, [["details", "Details"], ["order", "Order Builder"], ["production", "Production Sheet"], ["quote", "Quote / Invoice"], ["payments", "Payments"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => setCatSec(k),
+    style: {
+      background: catSec === k ? C.green : "transparent",
+      color: catSec === k ? C.white : C.charcoal,
+      border: "2px solid " + (catSec === k ? C.green : C.border),
+      borderRadius: 8,
+      padding: "7px 14px",
+      fontSize: 12,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: 700
+    }
+  }, l))), catSec === "details" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Event Details"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 12
     }
-  }, [["Event Name", "eventName"], ["Client Name", "clientName"], ["Phone", "clientPhone"], ["Email", "clientEmail"], ["Venue", "venue"], ["Quote #", "quoteNumber"]].map(_ref24 => {
-    let _ref25 = _slicedToArray(_ref24, 2),
-      l = _ref25[0],
-      k = _ref25[1];
-    return /*#__PURE__*/React.createElement("div", {
-      key: k
-    }, /*#__PURE__*/React.createElement("label", {
-      style: {
-        fontSize: 12,
-        color: C.charcoal,
-        display: "block",
-        marginBottom: 4
-      }
-    }, l), /*#__PURE__*/React.createElement(Inp, {
-      value: ev[k] || "",
-      onChange: v => updateEv({
-        [k]: v
-      }),
-      placeholder: l
-    }));
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, [["Event Name", "eventName"], ["Client Name", "clientName"], ["Phone", "clientPhone"], ["Email", "clientEmail"], ["Venue", "venue"], ["Quote #", "quoteNumber"]].map(([l, k]) => /*#__PURE__*/React.createElement("div", {
+    key: k
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal,
+      display: "block",
+      marginBottom: 4
+    }
+  }, l), /*#__PURE__*/React.createElement(Inp, {
+    value: ev[k] || "",
+    onChange: v => updateEv({
+      [k]: v
+    }),
+    placeholder: l
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     style: {
       fontSize: 12,
       color: C.charcoal,
@@ -7132,7 +6887,7 @@ function CateringTab(_ref21) {
       fontSize: 11,
       color: C.charcoal
     }
-  }, "Please remit payment to ", ev.clientEmail || "mcdonna6@hotmail.com"), /*#__PURE__*/React.createElement("div", {
+  }, (settings.business || {}).paymentInstructions || "Please update payment instructions in Settings → Business Information."), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       fontSize: 11,
@@ -7265,66 +7020,30 @@ function CateringTab(_ref21) {
 }
 
 // -- END OF DAY ---------------------------------------------------------------
-function EODTab(_ref26) {
-  let sales = _ref26.sales,
-    settings = _ref26.settings,
-    refunds = _ref26.refunds,
-    setRefunds = _ref26.setRefunds,
-    accounts = _ref26.accounts,
-    setAccounts = _ref26.setAccounts,
-    staff = _ref26.staff,
-    positions = _ref26.positions,
-    cateringEvents = _ref26.cateringEvents;
-  const _usePersistedState3 = usePersistedState("tog-eod", []),
-    _usePersistedState4 = _slicedToArray(_usePersistedState3, 3),
-    eodRecords = _usePersistedState4[0],
-    setEodRecords = _usePersistedState4[1],
-    loaded = _usePersistedState4[2];
-  const _useState143 = useState(today()),
-    _useState144 = _slicedToArray(_useState143, 2),
-    selDate = _useState144[0],
-    setSelDate = _useState144[1];
-  const _useState145 = useState("balance"),
-    _useState146 = _slicedToArray(_useState145, 2),
-    eodSec = _useState146[0],
-    setEodSec = _useState146[1]; // balance | transactions
-  const _useState147 = useState(""),
-    _useState148 = _slicedToArray(_useState147, 2),
-    cashCounted = _useState148[0],
-    setCashCounted = _useState148[1];
-  const _useState149 = useState(""),
-    _useState150 = _slicedToArray(_useState149, 2),
-    cardTotal = _useState150[0],
-    setCardTotal = _useState150[1];
-  const _useState151 = useState(""),
-    _useState152 = _slicedToArray(_useState151, 2),
-    transferTotal = _useState152[0],
-    setTransferTotal = _useState152[1];
-  const _useState153 = useState(""),
-    _useState154 = _slicedToArray(_useState153, 2),
-    notes = _useState154[0],
-    setNotes = _useState154[1];
-  const _useState155 = useState(false),
-    _useState156 = _slicedToArray(_useState155, 2),
-    saved = _useState156[0],
-    setSaved = _useState156[1];
+function EODTab({
+  sales,
+  settings,
+  refunds,
+  setRefunds,
+  accounts,
+  setAccounts,
+  staff,
+  positions,
+  cateringEvents
+}) {
+  const [eodRecords, setEodRecords, loaded] = usePersistedState("tog-eod", []);
+  const [selDate, setSelDate] = useState(today());
+  const [eodSec, setEodSec] = useState("balance"); // balance | transactions
+  const [cashCounted, setCashCounted] = useState("");
+  const [cardTotal, setCardTotal] = useState("");
+  const [transferTotal, setTransferTotal] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saved, setSaved] = useState(false);
   // Refund state
-  const _useState157 = useState(null),
-    _useState158 = _slicedToArray(_useState157, 2),
-    refundOrder = _useState158[0],
-    setRefundOrder = _useState158[1]; // sale object being refunded
-  const _useState159 = useState(""),
-    _useState160 = _slicedToArray(_useState159, 2),
-    refundReason = _useState160[0],
-    setRefundReason = _useState160[1];
-  const _useState161 = useState("Cash"),
-    _useState162 = _slicedToArray(_useState161, 2),
-    refundMethod = _useState162[0],
-    setRefundMethod = _useState162[1];
-  const _useState163 = useState(null),
-    _useState164 = _slicedToArray(_useState163, 2),
-    refundPin = _useState164[0],
-    setRefundPin = _useState164[1]; // pending refund needing PIN
+  const [refundOrder, setRefundOrder] = useState(null); // sale object being refunded
+  const [refundReason, setRefundReason] = useState("");
+  const [refundMethod, setRefundMethod] = useState("Cash");
+  const [refundPin, setRefundPin] = useState(null); // pending refund needing PIN
 
   // Only PAID sales count for EOD balancing (On Account is deferred)
   const allDay = sales.filter(s => s.date === selDate);
@@ -7517,21 +7236,21 @@ function EODTab(_ref26) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83E\uDDFE",
+    icon: "🧾",
     label: "Paid Orders",
     val: paidDay.length
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB5",
+    icon: "💵",
     label: "Net Revenue",
     val: fmt(netRevenue),
     color: C.green
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB4",
+    icon: "💴",
     label: "On Account (deferred)",
     val: fmt(deferredDay.reduce((s, x) => s + x.total, 0)),
     color: C.orange
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDD19",
+    icon: "🔙",
     label: "Refunds Today",
     val: fmt(refundTotal),
     color: refundTotal > 0 ? C.red : C.gray
@@ -7875,17 +7594,12 @@ function EODTab(_ref26) {
 }
 
 // -- EXPENSE TRENDS VIEW (extracted component to avoid hooks-in-render) --------
-function ExpenseTrendsView(_ref27) {
-  let expenses = _ref27.expenses,
-    settings = _ref27.settings;
-  const _useState165 = useState("All"),
-    _useState166 = _slicedToArray(_useState165, 2),
-    expCat = _useState166[0],
-    setExpCat = _useState166[1];
-  const _useState167 = useState("monthly"),
-    _useState168 = _slicedToArray(_useState167, 2),
-    expPeriod = _useState168[0],
-    setExpPeriod = _useState168[1];
+function ExpenseTrendsView({
+  expenses,
+  settings
+}) {
+  const [expCat, setExpCat] = useState("All");
+  const [expPeriod, setExpPeriod] = useState("monthly");
   const BASE_CATS = settings && settings.expenseCategories ? settings.expenseCategories : ["Lease", "Insurance", "Food & Inventory", "Supplies", "Marketing", "Utilities", "Staff Wages", "Licensing", "Other"];
   const EXPENSE_CATS = ["All", ...BASE_CATS];
   const CAT_PALETTE2 = [C.green, C.gold, C.darkGold, C.lightGreen, C.purple, C.blue, C.orange, "#AD1457", C.charcoal, C.teal, C.red, "#795548"];
@@ -7930,17 +7644,17 @@ function ExpenseTrendsView(_ref27) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB8",
+    icon: "💸",
     label: "Year to Date (" + currentYear + ")",
     val: fmt(yearTotal),
     color: C.red
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCC8",
+    icon: "📈",
     label: "Projected Annual",
     val: fmt(projectedAnnual),
     color: C.orange
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCCA",
+    icon: "📊",
     label: "Avg Per Month",
     val: fmt(monthsElapsed > 0 ? yearTotal / monthsElapsed : 0),
     color: C.charcoal
@@ -8046,16 +7760,8 @@ function ExpenseTrendsView(_ref27) {
       color: C.gray,
       fontSize: 13
     }
-  }, "No data.") : sortedCats.map(_ref28 => {
-    let _ref29 = _slicedToArray(_ref28, 2),
-      cat = _ref29[0],
-      total = _ref29[1];
-    const pct = Math.round(total / sortedCats.reduce((s, _ref30) => {
-      let _ref31 = _slicedToArray(_ref30, 2),
-        _ = _ref31[0],
-        v = _ref31[1];
-      return s + v;
-    }, 0) * 100);
+  }, "No data.") : sortedCats.map(([cat, total]) => {
+    const pct = Math.round(total / sortedCats.reduce((s, [_, v]) => s + v, 0) * 100);
     return /*#__PURE__*/React.createElement("div", {
       key: cat,
       style: {
@@ -8095,25 +7801,20 @@ function ExpenseTrendsView(_ref27) {
 }
 
 // -- REPORTS TAB --------------------------------------------------------------
-function ReportsTab(_ref32) {
-  let sales = _ref32.sales,
-    expenses = _ref32.expenses,
-    settings = _ref32.settings,
-    refunds = _ref32.refunds,
-    accounts = _ref32.accounts,
-    menu = _ref32.menu,
-    recipes = _ref32.recipes,
-    inventory = _ref32.inventory,
-    cateringEvents = _ref32.cateringEvents,
-    countLog = _ref32.countLog;
-  const _useState169 = useState("monthly"),
-    _useState170 = _slicedToArray(_useState169, 2),
-    view = _useState170[0],
-    setView = _useState170[1];
-  const _useState171 = useState(today().slice(0, 7)),
-    _useState172 = _slicedToArray(_useState171, 2),
-    selMonth = _useState172[0],
-    setSelMonth = _useState172[1];
+function ReportsTab({
+  sales,
+  expenses,
+  settings,
+  refunds,
+  accounts,
+  menu,
+  recipes,
+  inventory,
+  cateringEvents,
+  countLog
+}) {
+  const [view, setView] = useState("monthly");
+  const [selMonth, setSelMonth] = useState(today().slice(0, 7));
   const proj = settings.projections || {};
   // Only count COLLECTED revenue (exclude on-account until paid)
   const paidSales = sales.filter(s => s.paymentStatus !== "on-account");
@@ -8159,26 +7860,21 @@ function ReportsTab(_ref32) {
       marginBottom: 18,
       flexWrap: "wrap"
     }
-  }, [["monthly", "Monthly Overview"], ["detail", "Monthly Detail"], ["cost", "Cost Analysis"], ["expenses", "Expense Trends"], ["adjustments", "Adjustments"], ["tax", "Tax Summary"], ["variance", "Inventory Variance"]].map(_ref33 => {
-    let _ref34 = _slicedToArray(_ref33, 2),
-      v = _ref34[0],
-      l = _ref34[1];
-    return /*#__PURE__*/React.createElement("button", {
-      key: v,
-      onClick: () => setView(v),
-      style: {
-        background: view === v ? C.green : "transparent",
-        color: view === v ? C.white : C.charcoal,
-        border: "2px solid " + (view === v ? C.green : C.border),
-        borderRadius: 8,
-        padding: "8px 18px",
-        fontSize: 13,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        fontWeight: 700
-      }
-    }, l);
-  }), view === "detail" && /*#__PURE__*/React.createElement("input", {
+  }, [["monthly", "Monthly Overview"], ["detail", "Monthly Detail"], ["cost", "Cost Analysis"], ["expenses", "Expense Trends"], ["adjustments", "Adjustments"], ["tax", "Tax Summary"], ["variance", "Inventory Variance"]].map(([v, l]) => /*#__PURE__*/React.createElement("button", {
+    key: v,
+    onClick: () => setView(v),
+    style: {
+      background: view === v ? C.green : "transparent",
+      color: view === v ? C.white : C.charcoal,
+      border: "2px solid " + (view === v ? C.green : C.border),
+      borderRadius: 8,
+      padding: "8px 18px",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: 700
+    }
+  }, l)), view === "detail" && /*#__PURE__*/React.createElement("input", {
     type: "month",
     value: selMonth,
     onChange: e => setSelMonth(e.target.value),
@@ -8197,17 +7893,17 @@ function ReportsTab(_ref32) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB5",
+    icon: "💵",
     label: "Total Collected",
     val: fmt(paidSales.reduce((s, x) => s + x.total, 0) + allAccPmts.reduce((s, p) => s + p.amount, 0)),
     color: C.green
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB8",
+    icon: "💸",
     label: "Total Expenses",
     val: fmt(expenses.reduce((s, e) => s + e.amount, 0)),
     color: C.red
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCC8",
+    icon: "📈",
     label: "Total Orders",
     val: sales.length,
     color: C.blue
@@ -8273,50 +7969,46 @@ function ReportsTab(_ref32) {
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB5",
+    icon: "💵",
     label: "Revenue",
     val: fmt(mRevenue),
     color: C.green,
     sub: projected ? "Proj: " + fmt(projected) : ""
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB8",
+    icon: "💸",
     label: "Expenses",
     val: fmt(mExpTotal),
     color: C.red
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCC8",
+    icon: "📈",
     label: "Net Profit",
     val: fmt(mProfit),
     color: mProfit >= 0 ? C.green : C.red
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83E\uDDFE",
+    icon: "🧾",
     label: "Orders",
     val: mSales.length,
     color: C.blue
-  })), topItems.length > 0 ? /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Top Selling Items This Month"), topItems.map(_ref35 => {
-    let _ref36 = _slicedToArray(_ref35, 2),
-      name = _ref36[0],
-      _ref36$ = _ref36[1],
-      qty = _ref36$.qty,
-      rev = _ref36$.rev;
-    return /*#__PURE__*/React.createElement("div", {
-      key: name,
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 6,
-        fontSize: 13
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontWeight: 600
-      }
-    }, name), /*#__PURE__*/React.createElement("span", null, qty, " sold - ", /*#__PURE__*/React.createElement("strong", {
-      style: {
-        color: C.green
-      }
-    }, fmt(rev))));
-  })) : /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+  })), topItems.length > 0 ? /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Top Selling Items This Month"), topItems.map(([name, {
+    qty,
+    rev
+  }]) => /*#__PURE__*/React.createElement("div", {
+    key: name,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 6,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600
+    }
+  }, name), /*#__PURE__*/React.createElement("span", null, qty, " sold - ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.green
+    }
+  }, fmt(rev)))))) : /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       color: C.charcoal,
@@ -8331,22 +8023,22 @@ function ReportsTab(_ref32) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB8",
+    icon: "💸",
     label: "Total Refunds",
     val: fmt((refunds || []).reduce((s, r) => s + r.amount, 0)),
     color: C.red
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83C\uDFB9",
+    icon: "🎹",
     label: "Complimentary Value",
     val: fmt(sales.filter(s => s.discount && s.discount.type === "complimentary").reduce((s, x) => s + x.subtotal, 0)),
     color: C.teal
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCB9",
+    icon: "💹",
     label: "Discounts Given",
     val: fmt(sales.filter(s => s.discount && s.discount.type !== "complimentary").reduce((s, x) => s + x.discountAmt, 0)),
     color: C.purple
   }), /*#__PURE__*/React.createElement(Stat, {
-    icon: "\uD83D\uDCCB",
+    icon: "📋",
     label: "On Account Outstanding",
     val: fmt(sales.filter(s => s.paymentStatus === "on-account").reduce((s, x) => s + x.total, 0) - allAccPmts.reduce((s, p) => s + p.amount, 0)),
     color: C.orange
@@ -8822,7 +8514,7 @@ function ReportsTab(_ref32) {
       fontSize: 13,
       marginBottom: 16
     }
-  }, "Variance = Physical Count \u2212 System Quantity. Negative = stock missing (loss). Positive = surplus found."), (countLog || []).length === 0 ? /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("p", {
+  }, "Variance = Physical Count − System Quantity. Negative = stock missing (loss). Positive = surplus found."), (countLog || []).length === 0 ? /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("p", {
     style: {
       color: C.gray,
       textAlign: "center",
@@ -8854,7 +8546,7 @@ function ReportsTab(_ref32) {
         color: C.dark,
         fontSize: 15
       }
-    }, log.date, " \u2014 ", log.time), /*#__PURE__*/React.createElement("div", {
+    }, log.date, " — ", log.time), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
         color: C.charcoal
@@ -8980,13 +8672,11 @@ function ReportsTab(_ref32) {
 }
 
 // -- NEW POSITION FORM (extracted to avoid hooks-in-render violation) ----------
-function NewPositionForm(_ref37) {
-  let positions = _ref37.positions,
-    setPositions = _ref37.setPositions;
-  const _useState173 = useState(""),
-    _useState174 = _slicedToArray(_useState173, 2),
-    name = _useState174[0],
-    setName = _useState174[1];
+function NewPositionForm({
+  positions,
+  setPositions
+}) {
+  const [name, setName] = useState("");
   const add = () => {
     if (!name.trim()) return;
     const np = {
@@ -9024,13 +8714,11 @@ function NewPositionForm(_ref37) {
 }
 
 // -- EXPENSE CATEGORY FORM (extracted component) ------------------------------
-function ExpCatForm(_ref38) {
-  let settings = _ref38.settings,
-    setSettings = _ref38.setSettings;
-  const _useState175 = useState(""),
-    _useState176 = _slicedToArray(_useState175, 2),
-    newCat = _useState176[0],
-    setNewCat = _useState176[1];
+function ExpCatForm({
+  settings,
+  setSettings
+}) {
+  const [newCat, setNewCat] = useState("");
   const add = () => {
     if (!newCat.trim()) return;
     const existing = settings.expenseCategories || [];
@@ -9063,85 +8751,69 @@ function ExpCatForm(_ref38) {
 }
 
 // -- SETTINGS TAB -------------------------------------------------------------
-function SettingsTab(_ref39) {
-  let settings = _ref39.settings,
-    setSettings = _ref39.setSettings,
-    menu = _ref39.menu,
-    setMenu = _ref39.setMenu,
-    positions = _ref39.positions,
-    setPositions = _ref39.setPositions;
-  const _useState177 = useState("business"),
-    _useState178 = _slicedToArray(_useState177, 2),
-    section = _useState178[0],
-    setSection = _useState178[1];
-  const _useState179 = useState(""),
-    _useState180 = _slicedToArray(_useState179, 2),
-    newSupplier = _useState180[0],
-    setNewSupplier = _useState180[1];
-  const _useState181 = useState({
-      name: "",
-      cat: "Beverages",
-      price: "",
-      allergens: "",
-      available: true,
-      comesWith: "",
-      customGroups: []
-    }),
-    _useState182 = _slicedToArray(_useState181, 2),
-    menuForm = _useState182[0],
-    setMenuForm = _useState182[1];
-  const _useState183 = useState(null),
-    _useState184 = _slicedToArray(_useState183, 2),
-    custItemId = _useState184[0],
-    setCustItemId = _useState184[1]; // which item we're editing customGroups for
-  const _useState185 = useState([]),
-    _useState186 = _slicedToArray(_useState185, 2),
-    custGroups = _useState186[0],
-    setCustGroups = _useState186[1]; // working copy of groups
-  const _useState187 = useState(""),
-    _useState188 = _slicedToArray(_useState187, 2),
-    newGroupLabel = _useState188[0],
-    setNewGroupLabel = _useState188[1];
-  const _useState189 = useState(true),
-    _useState190 = _slicedToArray(_useState189, 2),
-    newGroupReq = _useState190[0],
-    setNewGroupReq = _useState190[1];
-  const _useState191 = useState(""),
-    _useState192 = _slicedToArray(_useState191, 2),
-    newOptName = _useState192[0],
-    setNewOptName = _useState192[1];
-  const _useState193 = useState("0"),
-    _useState194 = _slicedToArray(_useState193, 2),
-    newOptPrice = _useState194[0],
-    setNewOptPrice = _useState194[1];
-  const _useState195 = useState(null),
-    _useState196 = _slicedToArray(_useState195, 2),
-    addingOptFor = _useState196[0],
-    setAddingOptFor = _useState196[1]; // groupId
+function SettingsTab({
+  settings,
+  setSettings,
+  menu,
+  setMenu,
+  positions,
+  setPositions
+}) {
+  const [section, setSection] = useState("business");
+  const [newSupplier, setNewSupplier] = useState("");
+  const [menuForm, setMenuForm] = useState({
+    name: "",
+    cat: "Beverages",
+    price: "",
+    allergens: "",
+    available: true,
+    comesWith: "",
+    customGroups: []
+  });
+  const [editingMenuId, setEditingMenuId] = useState(null);
+  const [custItemId, setCustItemId] = useState(null); // which item we're editing customGroups for
+  const [custGroups, setCustGroups] = useState([]); // working copy of groups
+  const [newGroupLabel, setNewGroupLabel] = useState("");
+  const [newGroupReq, setNewGroupReq] = useState(true);
+  const [newOptName, setNewOptName] = useState("");
+  const [newOptPrice, setNewOptPrice] = useState("0");
+  const [addingOptFor, setAddingOptFor] = useState(null); // groupId
 
   const MENU_CATS = ["Beverages", "Breakfast", "Chicken Box", "Patties", "Mains", "Donna's Specials", "Desserts", "Kids", "Sides"];
   const addMenuItem = () => {
     if (!menuForm.name || !menuForm.price) return;
-    const allergens = menuForm.allergens ? menuForm.allergens.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const comesWith = menuForm.comesWith ? menuForm.comesWith.split(",").map(s => s.trim()).filter(Boolean) : [];
-    setMenu([...menu, {
-      ...menuForm,
-      id: Date.now(),
-      price: parseFloat(menuForm.price),
-      allergens,
-      comesWith,
-      customGroups: []
-    }]);
+    const allergens = menuForm.allergens ? menuForm.allergens.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const comesWith = menuForm.comesWith ? menuForm.comesWith.split(',').map(s => s.trim()).filter(Boolean) : [];
+    if (editingMenuId) {
+      setMenu(menu.map(m => m.id === editingMenuId ? {
+        ...m,
+        ...menuForm,
+        price: parseFloat(menuForm.price),
+        allergens,
+        comesWith
+      } : m));
+      setEditingMenuId(null);
+    } else {
+      setMenu([...menu, {
+        ...menuForm,
+        id: Date.now(),
+        price: parseFloat(menuForm.price),
+        allergens,
+        comesWith,
+        customGroups: []
+      }]);
+    }
     setMenuForm({
-      name: "",
-      cat: "Beverages",
-      price: "",
-      allergens: "",
+      name: '',
+      cat: 'Beverages',
+      price: '',
+      allergens: '',
       available: true,
-      comesWith: "",
+      comesWith: '',
       customGroups: []
     });
   };
+  ;
   const openCustEditor = item => {
     setCustItemId(item.id);
     setCustGroups(JSON.parse(JSON.stringify(item.customGroups || [])));
@@ -9239,30 +8911,89 @@ function SettingsTab(_ref39) {
       gridTemplateColumns: "1fr 1fr",
       gap: 12
     }
-  }, [["Business Name", "name"], ["Address", "address"], ["Phone", "phone"], ["Email", "email"], ["GST Number", "gstNumber"], ["PST Number", "pstNumber"], ["Established", "established"]].map(_ref40 => {
-    let _ref41 = _slicedToArray(_ref40, 2),
-      label = _ref41[0],
-      key = _ref41[1];
-    return /*#__PURE__*/React.createElement("div", {
-      key: key
-    }, /*#__PURE__*/React.createElement("label", {
-      style: {
-        fontSize: 12,
-        color: C.charcoal,
-        display: "block",
-        marginBottom: 4
+  }, [["Business Name", "name"], ["Address", "address"], ["Phone", "phone"], ["Email", "email"], ["GST Number", "gstNumber"], ["PST Number", "pstNumber"], ["Established", "established"]].map(([label, key]) => /*#__PURE__*/React.createElement("div", {
+    key: key
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal,
+      display: "block",
+      marginBottom: 4
+    }
+  }, label), /*#__PURE__*/React.createElement(Inp, {
+    value: (settings.business || {})[key] || "",
+    onChange: v => setSettings({
+      ...settings,
+      business: {
+        ...settings.business,
+        [key]: v
       }
-    }, label), /*#__PURE__*/React.createElement(Inp, {
-      value: (settings.business || {})[key] || "",
-      onChange: v => setSettings({
-        ...settings,
-        business: {
-          ...settings.business,
-          [key]: v
-        }
-      }),
-      placeholder: label
-    }));
+    }),
+    placeholder: label
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal,
+      display: "block",
+      marginBottom: 4,
+      fontWeight: 600
+    }
+  }, "Payment Instructions (appears on catering quotes)"), /*#__PURE__*/React.createElement("textarea", {
+    value: (settings.business || {}).paymentInstructions || "",
+    onChange: e => setSettings({
+      ...settings,
+      business: {
+        ...settings.business,
+        paymentInstructions: e.target.value
+      }
+    }),
+    placeholder: "e.g. E-transfer to: payments@touchofgracekitchen.com | Bank Transfer: [bank details] | Reference: your name + event date",
+    style: {
+      width: "100%",
+      padding: "8px 10px",
+      border: "1px solid " + C.border,
+      borderRadius: 6,
+      fontSize: 13,
+      fontFamily: "inherit",
+      minHeight: 70,
+      resize: "vertical"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal,
+      display: "block",
+      marginBottom: 4,
+      fontWeight: 600
+    }
+  }, "Catering Terms & Conditions (appears on all quotes)"), /*#__PURE__*/React.createElement("textarea", {
+    value: (settings.business || {}).cateringTerms || "",
+    onChange: e => setSettings({
+      ...settings,
+      business: {
+        ...settings.business,
+        cateringTerms: e.target.value
+      }
+    }),
+    placeholder: "e.g. A 50% deposit is required to confirm your booking. Cancellations within 72 hours of the event are non-refundable. Final headcount must be confirmed 48 hours before the event.",
+    style: {
+      width: "100%",
+      padding: "8px 10px",
+      border: "1px solid " + C.border,
+      borderRadius: 6,
+      fontSize: 13,
+      fontFamily: "inherit",
+      minHeight: 80,
+      resize: "vertical"
+    }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
@@ -9591,11 +9322,32 @@ function SettingsTab(_ref39) {
     style: {
       fontSize: 12
     }
-  }, "Available now")), /*#__PURE__*/React.createElement(Btn, {
+  }, "Available now")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
     small: true,
     onClick: addMenuItem,
-    color: C.green
-  }, "Add Item"))), /*#__PURE__*/React.createElement("div", {
+    color: editingMenuId ? C.gold : C.green
+  }, editingMenuId ? 'Save Changes' : 'Add Item'), editingMenuId && /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => {
+      setEditingMenuId(null);
+      setMenuForm({
+        name: '',
+        cat: 'Beverages',
+        price: '',
+        allergens: '',
+        available: true,
+        comesWith: '',
+        customGroups: []
+      });
+    },
+    color: C.charcoal,
+    outline: true
+  }, "Cancel")))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: C.charcoal,
@@ -9697,9 +9449,27 @@ function SettingsTab(_ref39) {
     }
   }, item.available ? "Available" : "Hidden")), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "8px 12px"
+      padding: '8px 12px',
+      display: 'flex',
+      gap: 4
     }
   }, /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => {
+      setEditingMenuId(item.id);
+      setMenuForm({
+        name: item.name,
+        cat: item.cat,
+        price: String(item.price),
+        allergens: (item.allergens || []).join(', '),
+        available: item.available,
+        comesWith: (item.comesWith || []).join(', '),
+        customGroups: item.customGroups || []
+      });
+    },
+    color: C.blue,
+    outline: true
+  }, "Edit"), /*#__PURE__*/React.createElement(Btn, {
     small: true,
     onClick: () => setMenu(menu.filter(m => m.id !== item.id)),
     color: C.red,
@@ -10005,83 +9775,23 @@ const TABS = [{
   label: "Settings"
 }];
 function App() {
-  const _useState197 = useState("pos"),
-    _useState198 = _slicedToArray(_useState197, 2),
-    tab = _useState198[0],
-    setTab = _useState198[1];
-  const _usePersistedState5 = usePersistedState("tog-settings", DEFAULT_SETTINGS),
-    _usePersistedState6 = _slicedToArray(_usePersistedState5, 3),
-    settings = _usePersistedState6[0],
-    setSettings = _usePersistedState6[1],
-    sLoaded = _usePersistedState6[2];
-  const _usePersistedState7 = usePersistedState("tog-menu", MENU_INIT),
-    _usePersistedState8 = _slicedToArray(_usePersistedState7, 3),
-    menu = _usePersistedState8[0],
-    setMenu = _usePersistedState8[1],
-    mLoaded = _usePersistedState8[2];
-  const _usePersistedState9 = useSharedState("tog-sales", []),
-    _usePersistedState0 = _slicedToArray(_usePersistedState9, 3),
-    sales = _usePersistedState0[0],
-    setSales = _usePersistedState0[1],
-    salLoaded = _usePersistedState0[2];
-  const _usePersistedState1 = usePersistedState("tog-expenses", EXPENSES_INIT),
-    _usePersistedState10 = _slicedToArray(_usePersistedState1, 3),
-    expenses = _usePersistedState10[0],
-    setExpenses = _usePersistedState10[1],
-    expLoaded = _usePersistedState10[2];
-  const _usePersistedState11 = usePersistedState("tog-accounts", ACCOUNTS_INIT),
-    _usePersistedState12 = _slicedToArray(_usePersistedState11, 3),
-    accounts = _usePersistedState12[0],
-    setAccounts = _usePersistedState12[1],
-    accLoaded = _usePersistedState12[2];
-  const _usePersistedState13 = usePersistedState("tog-inventory", INVENTORY_INIT),
-    _usePersistedState14 = _slicedToArray(_usePersistedState13, 3),
-    inventory = _usePersistedState14[0],
-    setInventory = _usePersistedState14[1],
-    invLoaded = _usePersistedState14[2];
-  const _usePersistedState15 = usePersistedState("tog-recipes", RECIPES_INIT),
-    _usePersistedState16 = _slicedToArray(_usePersistedState15, 3),
-    recipes = _usePersistedState16[0],
-    setRecipes = _usePersistedState16[1],
-    recLoaded = _usePersistedState16[2];
-  const _usePersistedState17 = usePersistedState("tog-refunds", []),
-    _usePersistedState18 = _slicedToArray(_usePersistedState17, 3),
-    refunds = _usePersistedState18[0],
-    setRefunds = _usePersistedState18[1],
-    refLoaded = _usePersistedState18[2];
-  const _usePersistedState19 = usePersistedState("tog-count-log", []),
-    _usePersistedState20 = _slicedToArray(_usePersistedState19, 3),
-    countLog = _usePersistedState20[0],
-    setCountLog = _usePersistedState20[1],
-    logLoaded = _usePersistedState20[2];
-  const _usePersistedState21 = usePersistedState("tog-catering", CATERING_INIT),
-    _usePersistedState22 = _slicedToArray(_usePersistedState21, 3),
-    cateringEvents = _usePersistedState22[0],
-    setCateringEvents = _usePersistedState22[1],
-    catLoaded = _usePersistedState22[2];
-  const _usePersistedState23 = usePersistedState("tog-staff", STAFF_INIT),
-    _usePersistedState24 = _slicedToArray(_usePersistedState23, 3),
-    staff = _usePersistedState24[0],
-    setStaff = _usePersistedState24[1],
-    staffLoaded = _usePersistedState24[2];
-  const _usePersistedState25 = usePersistedState("tog-positions", POSITIONS_INIT),
-    _usePersistedState26 = _slicedToArray(_usePersistedState25, 3),
-    positions = _usePersistedState26[0],
-    setPositions = _usePersistedState26[1],
-    posLoaded = _usePersistedState26[2];
-  const _useSharedState = useSharedState("tog-kitchen-queue", []),
-    _useSharedState2 = _slicedToArray(_useSharedState, 2),
-    kitchenOrders = _useSharedState2[0],
-    setKitchenOrders = _useSharedState2[1];
+  const [tab, setTab] = useState("pos");
+  const [settings, setSettings, sLoaded] = usePersistedState("tog-settings", DEFAULT_SETTINGS);
+  const [menu, setMenu, mLoaded] = usePersistedState("tog-menu", MENU_INIT);
+  const [sales, setSales, salLoaded] = useSharedState("tog-sales", []);
+  const [expenses, setExpenses, expLoaded] = usePersistedState("tog-expenses", EXPENSES_INIT);
+  const [accounts, setAccounts, accLoaded] = usePersistedState("tog-accounts", ACCOUNTS_INIT);
+  const [inventory, setInventory, invLoaded] = usePersistedState("tog-inventory", INVENTORY_INIT);
+  const [recipes, setRecipes, recLoaded] = usePersistedState("tog-recipes", RECIPES_INIT);
+  const [refunds, setRefunds, refLoaded] = usePersistedState("tog-refunds", []);
+  const [countLog, setCountLog, logLoaded] = usePersistedState("tog-count-log", []);
+  const [cateringEvents, setCateringEvents, catLoaded] = usePersistedState("tog-catering", CATERING_INIT);
+  const [staff, setStaff, staffLoaded] = usePersistedState("tog-staff", STAFF_INIT);
+  const [positions, setPositions, posLoaded] = usePersistedState("tog-positions", POSITIONS_INIT);
+  const [kitchenOrders, setKitchenOrders] = useSharedState("tog-kitchen-queue", []);
   // Tab session hooks MUST be before early return (Rules of Hooks)
-  const _useState199 = useState({}),
-    _useState200 = _slicedToArray(_useState199, 2),
-    tabSessions = _useState200[0],
-    setTabSessions = _useState200[1];
-  const _useState201 = useState(null),
-    _useState202 = _slicedToArray(_useState201, 2),
-    pendingTab = _useState202[0],
-    setPendingTab = _useState202[1];
+  const [tabSessions, setTabSessions] = useState({});
+  const [pendingTab, setPendingTab] = useState(null);
   const allLoaded = sLoaded && mLoaded && salLoaded && expLoaded && accLoaded && invLoaded && recLoaded && refLoaded && staffLoaded && posLoaded;
   if (!allLoaded) return /*#__PURE__*/React.createElement(LoadingScreen, null);
   const TAB_PERM_KEY = {
@@ -10203,7 +9913,7 @@ function App() {
       justifyContent: "center",
       fontSize: 24
     }
-  }, "\uD83C\uDF7D"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "🍽"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       color: C.gold,
       fontWeight: 800,
@@ -10287,7 +9997,7 @@ function App() {
         fontSize: 11,
         marginRight: 4
       }
-    }, "\uD83D\uDD12"), /*#__PURE__*/React.createElement("span", {
+    }, "🔒"), /*#__PURE__*/React.createElement("span", {
       dangerouslySetInnerHTML: {
         __html: t.icon
       }
