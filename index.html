@@ -5727,7 +5727,8 @@ function CateringTab({
   menu,
   recipes,
   inventory,
-  setInventory
+  setInventory,
+  settings
 }) {
   const [selId, setSelId] = useState(null);
   const [catSec, setCatSec] = useState("details");
@@ -10069,7 +10070,8 @@ function App() {
     menu: menu,
     recipes: recipes,
     inventory: inventory,
-    setInventory: setInventory
+    setInventory: setInventory,
+    settings: settings
   }), tab === "accounts" && /*#__PURE__*/React.createElement(AccountsTab, {
     accounts: accounts,
     setAccounts: setAccounts,
