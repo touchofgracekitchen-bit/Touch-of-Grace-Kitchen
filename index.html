@@ -5768,7 +5768,9 @@ function CateringTab({
   const svcAmt = ev ? itemsSub * ((ev.serviceChargePct || 0) / 100) : 0;
   const preDisc = itemsSub + svcAmt;
   const discAmt = ev ? ev.discountType === "percent" ? preDisc * (ev.discountValue || 0) / 100 : ev.discountType === "fixed" ? Math.min(ev.discountValue || 0, preDisc) : 0 : 0;
-  const evTotal = preDisc - discAmt;
+  const quoteGST = ev && ev.applyGST !== false && (settings.taxes || {}).gstEnabled !== false ? (preDisc - discAmt) * ((settings.taxes || {}).gst || 5) / 100 : 0;
+  const quotePST = ev && ev.applyPST !== false && (settings.taxes || {}).pstEnabled !== false ? (preDisc - discAmt) * ((settings.taxes || {}).pst || 7) / 100 : 0;
+  const evTotal = preDisc - discAmt + quoteGST + quotePST;
   const totalPaid = ev ? (ev.payments || []).reduce((s, p) => s + p.amount, 0) : 0;
   const outstanding = evTotal - totalPaid;
   const prodNeeds = ev ? (() => {
@@ -6855,7 +6857,19 @@ function CateringTab({
       border: "1px dashed " + C.border,
       margin: "8px 0"
     }
-  }), /*#__PURE__*/React.createElement("div", {
+  }), quoteGST > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "GST (", (settings.taxes || {}).gst || 5, "%)"), /*#__PURE__*/React.createElement("span", null, fmt(quoteGST))), quotePST > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "PST (", (settings.taxes || {}).pst || 7, "%)"), /*#__PURE__*/React.createElement("span", null, fmt(quotePST))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
