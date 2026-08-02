@@ -1829,8 +1829,8 @@ function POSTab({
   const [compAuth, setCompAuth] = useState(null);
   // Manager PIN gate: "discount" | "complimentary" | null
   const [pinGate, setPinGate] = useState(null);
-  const gst = settings.taxes.gst / 100;
-  const pst = settings.taxes.pst / 100;
+  const gst = settings.taxes.gstEnabled !== false ? settings.taxes.gst / 100 : 0;
+  const pst = settings.taxes.pstEnabled !== false ? settings.taxes.pst / 100 : 0;
   const cats = ["All", ...Array.from(new Set(menu.filter(m => m.available).map(m => m.cat)))];
   const visible = menu.filter(m => m.available && (filterCat === "All" || m.cat === filterCat));
   const subtotal = order.reduce((s, i) => s + i.price * i.qty, 0);
@@ -9025,14 +9025,42 @@ function SettingsTab({
       gap: 12,
       marginBottom: 14
     }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("label", {
     style: {
       fontSize: 12,
       color: C.charcoal,
-      display: "block",
-      marginBottom: 4
+      fontWeight: 600
     }
-  }, "GST Rate (%)"), /*#__PURE__*/React.createElement(Inp, {
+  }, "GST Rate (%)"), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 12,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: (settings.taxes || {}).gstEnabled !== false,
+    onChange: e => setSettings({
+      ...settings,
+      taxes: {
+        ...settings.taxes,
+        gstEnabled: e.target.checked
+      }
+    }),
+    style: {
+      width: 14,
+      height: 14
+    }
+  }), (settings.taxes || {}).gstEnabled !== false ? "Enabled" : "Disabled")), /*#__PURE__*/React.createElement(Inp, {
     type: "number",
     value: (settings.taxes || {}).gst || 5,
     onChange: v => setSettings({
@@ -9043,14 +9071,42 @@ function SettingsTab({
       }
     }),
     placeholder: "5"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("label", {
     style: {
       fontSize: 12,
       color: C.charcoal,
-      display: "block",
-      marginBottom: 4
+      fontWeight: 600
     }
-  }, "PST Rate (%)"), /*#__PURE__*/React.createElement(Inp, {
+  }, "PST Rate (%)"), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 12,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: (settings.taxes || {}).pstEnabled !== false,
+    onChange: e => setSettings({
+      ...settings,
+      taxes: {
+        ...settings.taxes,
+        pstEnabled: e.target.checked
+      }
+    }),
+    style: {
+      width: 14,
+      height: 14
+    }
+  }), (settings.taxes || {}).pstEnabled !== false ? "Enabled" : "Disabled")), /*#__PURE__*/React.createElement(Inp, {
     type: "number",
     value: (settings.taxes || {}).pst || 7,
     onChange: v => setSettings({
@@ -9068,7 +9124,7 @@ function SettingsTab({
       padding: 10,
       fontSize: 12
     }
-  }, "BC standard rates: GST 5% + PST 7%.")), section === "menu" && /*#__PURE__*/React.createElement("div", null, custItemId && /*#__PURE__*/React.createElement("div", {
+  }, "BC standard rates: GST 5% + PST 7%. Toggle either off if you are exempt from collecting that tax.")), section === "menu" && /*#__PURE__*/React.createElement("div", null, custItemId && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       top: 0,
