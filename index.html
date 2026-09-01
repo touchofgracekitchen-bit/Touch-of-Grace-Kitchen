@@ -7,7 +7,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
   <title>Touch of Grace Kitchen</title>
-  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Georgia, serif; background: #F0EBE0; }</style>
+  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Georgia, serif; background: #F0EBE0; }
+    @media print {
+      body * { visibility: hidden; }
+      #receipt-print-area, #receipt-print-area * { visibility: visible; }
+      #receipt-print-area { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 12px; }
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -1818,6 +1824,7 @@ function POSTab({
   const [filterCat, setFilterCat] = useState("All");
   const [customItem, setCustomItem] = useState(null);
   const [receipt, setReceipt] = useState(null);
+  const [customerEmail, setCustomerEmail] = useState("");
   const [orderNum, setOrderNum] = useState(() => 100 + Math.floor(Math.random() * 900));
   // Discount state
   const [showDiscount, setShowDiscount] = useState(false);
@@ -1948,6 +1955,42 @@ function POSTab({
     setCompAuth(null);
   };
   const activeAccounts = accounts.filter(a => a.active);
+  const buildReceiptText = r => {
+    const lines = [];
+    lines.push(settings.business.name);
+    if (settings.business.address) lines.push(settings.business.address);
+    if (settings.business.phone) lines.push(settings.business.phone);
+    if (settings.business.gstNumber) lines.push("GST# " + settings.business.gstNumber);
+    lines.push("");
+    lines.push("Order #" + r.orderNumber + " - " + r.date + " " + r.time + " - " + r.orderType);
+    lines.push("------------------------------");
+    r.items.forEach(i => {
+      lines.push(i.qty + "x " + i.name + (i.customization ? " (" + i.customization + ")" : "") + " - " + fmt(i.price * i.qty));
+    });
+    lines.push("------------------------------");
+    lines.push("Subtotal: " + fmt(r.subtotal));
+    if (r.discount) {
+      lines.push(r.discount.label + ": -" + fmt(r.discount.amount));
+    } else {
+      lines.push("GST (" + settings.taxes.gst + "%): " + fmt(r.gst));
+      lines.push("PST (" + settings.taxes.pst + "%): " + fmt(r.pst));
+    }
+    lines.push("TOTAL: " + fmt(r.total));
+    if (r.payMethod === "Cash" && parseFloat(cashGiven) > 0) {
+      lines.push("Cash: " + fmt(cashGiven));
+      lines.push("Change: " + fmt(change));
+    }
+    lines.push("");
+    lines.push("Real Jamaican Flavour Made with Love");
+    return lines.join("\n");
+  };
+  const emailReceipt = () => {
+    if (!receipt) return;
+    const to = customerEmail.trim();
+    const subject = encodeURIComponent(settings.business.name + " - Receipt #" + receipt.orderNumber);
+    const body = encodeURIComponent(buildReceiptText(receipt));
+    window.location.href = "mailto:" + encodeURIComponent(to) + "?subject=" + subject + "&body=" + body;
+  };
   if (receipt) {
     const acc = receipt.accountId ? accounts.find(a => a.id === receipt.accountId) : null;
     return /*#__PURE__*/React.createElement("div", {
@@ -1997,6 +2040,7 @@ function POSTab({
         color: C.green
       }
     }, "Discount: ", /*#__PURE__*/React.createElement("strong", null, receipt.discount.label))), /*#__PURE__*/React.createElement("div", {
+      id: "receipt-print-area",
       style: {
         background: C.lightGold,
         borderRadius: 8,
@@ -2114,7 +2158,39 @@ function POSTab({
         textAlign: "center",
         fontSize: 13
       }
-    }, "Order sent to kitchen!"), /*#__PURE__*/React.createElement(Btn, {
+    }, "Order sent to kitchen!"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 8,
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement(Btn, {
+      onClick: () => window.print(),
+      color: C.charcoal,
+      style: {
+        flex: 1
+      }
+    }, "🖨 Print Receipt"), /*#__PURE__*/React.createElement(Btn, {
+      onClick: emailReceipt,
+      color: C.blue,
+      style: {
+        flex: 1
+      }
+    }, "📧 Email Receipt")), /*#__PURE__*/React.createElement("input", {
+      type: "email",
+      value: customerEmail,
+      onChange: e => setCustomerEmail(e.target.value),
+      placeholder: "Customer email (for Email Receipt)",
+      style: {
+        width: "100%",
+        padding: "10px 12px",
+        borderRadius: 8,
+        border: "1px solid " + C.border,
+        fontFamily: "inherit",
+        fontSize: 13,
+        marginBottom: 12
+      }
+    }), /*#__PURE__*/React.createElement(Btn, {
       onClick: clearOrder,
       style: {
         width: "100%"
