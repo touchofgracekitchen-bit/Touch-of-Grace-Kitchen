@@ -1345,7 +1345,13 @@ const POSITIONS_INIT = [{
 
 // -- HELPERS ------------------------------------------------------------------
 const fmt = n => "$" + Number(n || 0).toFixed(2);
-const today = () => new Date().toISOString().split("T")[0];
+const today = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+};
 const nowStr = () => new Date().toLocaleTimeString("en-CA", {
   hour: "2-digit",
   minute: "2-digit"
@@ -1804,6 +1810,98 @@ function CustomizeModal({
   }, "Cancel"))));
 }
 
+// -- COLLECT PICKUP PAYMENT MODAL ---------------------------------------------
+function CollectPickupModal({
+  sale,
+  onConfirm,
+  onCancel
+}) {
+  const [method, setMethod] = useState("Card Machine");
+  const [cash, setCash] = useState("");
+  const change = parseFloat(cash || 0) - sale.total;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "rgba(0,0,0,0.7)",
+      zIndex: 999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Card, {
+    style: {
+      width: 360,
+      border: "2px solid " + C.gold
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 800,
+      fontSize: 16,
+      marginBottom: 4
+    }
+  }, "Collect Payment"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.charcoal,
+      marginBottom: 12
+    }
+  }, sale.customerName, " - Order #", sale.orderNumber), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.lightGold,
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 12,
+      textAlign: "center",
+      fontSize: 22,
+      fontWeight: 800,
+      color: C.green
+    }
+  }, fmt(sale.total)), /*#__PURE__*/React.createElement(Sel, {
+    value: method,
+    onChange: setMethod,
+    options: ["Card Machine", "Cash", "Transfer"],
+    style: {
+      marginBottom: 8
+    }
+  }), method === "Cash" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement(Inp, {
+    type: "number",
+    value: cash,
+    onChange: setCash,
+    placeholder: "Cash given by customer"
+  }), parseFloat(cash) >= sale.total && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.green,
+      fontWeight: 700,
+      fontSize: 13,
+      marginTop: 4
+    }
+  }, "Change: ", fmt(change))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => onConfirm(method, cash),
+    style: {
+      flex: 1
+    }
+  }, "Confirm Payment"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: onCancel,
+    color: C.charcoal,
+    outline: true
+  }, "Cancel"))));
+}
+
 // -- POS TAB ------------------------------------------------------------------
 function POSTab({
   menu,
@@ -1813,7 +1911,9 @@ function POSTab({
   kitchenOrders,
   setKitchenOrders,
   staff,
-  positions
+  positions,
+  sales,
+  onCollectPayment
 }) {
   const [order, setOrder] = useState([]);
   const [note, setNote] = useState("");
@@ -1825,6 +1925,8 @@ function POSTab({
   const [customItem, setCustomItem] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [collectingSale, setCollectingSale] = useState(null);
   const [orderNum, setOrderNum] = useState(() => 100 + Math.floor(Math.random() * 900));
   // Discount state
   const [showDiscount, setShowDiscount] = useState(false);
@@ -1895,6 +1997,7 @@ function POSTab({
     setCashGiven("");
     setReceipt(null);
     setAccountId("");
+    setCustomerName("");
     setShowDiscount(false);
     setDiscountValue("");
     setDiscountItemIdx("");
@@ -1906,6 +2009,10 @@ function POSTab({
     // Complimentary requires auth
     if (isComp && !compAuth) {
       setPinGate("complimentary");
+      return;
+    }
+    // Pay at Pickup requires a customer name so staff know who to collect from
+    if (!isComp && payMethod === "Pay at Pickup" && !customerName.trim()) {
       return;
     }
     const num = orderNum;
@@ -1932,8 +2039,9 @@ function POSTab({
       total: parseFloat((total || 0).toFixed(2)),
       orderType,
       payMethod: effectivePayMethod,
-      paymentStatus: effectivePayMethod === "On Account" ? "on-account" : "paid",
+      paymentStatus: effectivePayMethod === "On Account" ? "on-account" : effectivePayMethod === "Pay at Pickup" ? "unpaid" : "paid",
       accountId: effectivePayMethod === "On Account" ? parseInt(accountId) : null,
+      customerName: effectivePayMethod === "Pay at Pickup" ? customerName.trim() : "",
       discount,
       note
     };
@@ -1948,6 +2056,7 @@ function POSTab({
     setNote("");
     setCashGiven("");
     setAccountId("");
+    setCustomerName("");
     setShowDiscount(false);
     setDiscountValue("");
     setDiscountItemIdx("");
@@ -1955,6 +2064,12 @@ function POSTab({
     setCompAuth(null);
   };
   const activeAccounts = accounts.filter(a => a.active);
+  const pendingPickups = (sales || []).filter(s => s.paymentStatus === "unpaid").sort((a, b) => a.id - b.id);
+  const confirmCollectPayment = (method, cashGivenAmt) => {
+    if (!collectingSale) return;
+    onCollectPayment(collectingSale.id, method, parseFloat(cashGivenAmt) || 0);
+    setCollectingSale(null);
+  };
   const buildReceiptText = r => {
     const lines = [];
     lines.push(settings.business.name);
@@ -2570,7 +2685,7 @@ function POSTab({
   }, /*#__PURE__*/React.createElement("span", null, "TOTAL"), /*#__PURE__*/React.createElement("span", null, fmt(total)))), !isComp && /*#__PURE__*/React.createElement(Sel, {
     value: payMethod,
     onChange: setPayMethod,
-    options: ["Card Machine", "Cash", "Transfer", "On Account"]
+    options: ["Card Machine", "Cash", "Transfer", "On Account", "Pay at Pickup"]
   }), isComp && /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.teal,
@@ -2593,7 +2708,17 @@ function POSTab({
       fontSize: 14,
       marginTop: 4
     }
-  }, "Change: ", fmt(change))), payMethod === "On Account" && !isComp && /*#__PURE__*/React.createElement("div", null, activeAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Change: ", fmt(change))), payMethod === "Pay at Pickup" && !isComp && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Inp, {
+    value: customerName,
+    onChange: setCustomerName,
+    placeholder: "Customer name (required)"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal,
+      marginTop: 4
+    }
+  }, "Sent straight to the kitchen. Collect payment when they arrive from the \"Pending Pickup\" list below the menu.")), payMethod === "On Account" && !isComp && /*#__PURE__*/React.createElement("div", null, activeAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.lightRed,
       borderRadius: 8,
@@ -2620,16 +2745,72 @@ function POSTab({
       width: "100%",
       padding: 14,
       fontSize: 15,
-      background: isComp ? C.teal : C.green
+      background: isComp ? C.teal : payMethod === "Pay at Pickup" ? C.orange : C.green,
+      opacity: payMethod === "Pay at Pickup" && !isComp && !customerName.trim() ? 0.6 : 1
     }
-  }, isComp ? "Complete - Complimentary" : "Place Order - " + fmt(total)), /*#__PURE__*/React.createElement(Btn, {
+  }, isComp ? "Complete - Complimentary" : payMethod === "Pay at Pickup" ? "Send to Kitchen - Pay Later (" + fmt(total) + ")" : "Place Order - " + fmt(total)), /*#__PURE__*/React.createElement(Btn, {
     onClick: clearOrder,
     color: C.red,
     outline: true,
     style: {
       width: "100%"
     }
-  }, "Clear"))));
+  }, "Clear"))), pendingPickups.length > 0 && /*#__PURE__*/React.createElement(Card, {
+    style: {
+      gridColumn: "1 / -1",
+      marginTop: 16,
+      border: "2px solid " + C.orange
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 800,
+      fontSize: 15,
+      color: C.orange,
+      marginBottom: 10
+    }
+  }, "⏳ Pending Pickup - Awaiting Payment (", pendingPickups.length, ")"), pendingPickups.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 8,
+      padding: "10px 12px",
+      background: C.lightGold,
+      borderRadius: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      color: C.dark
+    }
+  }, s.customerName || "(no name)", " - Order #", s.orderNumber), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.charcoal
+    }
+  }, s.time, " - ", s.items.map(i => i.qty + "x " + i.name).join(", "))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.red,
+      fontSize: 15
+    }
+  }, fmt(s.total)), /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => setCollectingSale(s)
+  }, "Collect Payment"))))), collectingSale && /*#__PURE__*/React.createElement(CollectPickupModal, {
+    sale: collectingSale,
+    onConfirm: confirmCollectPayment,
+    onCancel: () => setCollectingSale(null)
+  }));
 }
 
 // -- KITCHEN TAB --------------------------------------------------------------
@@ -5078,7 +5259,8 @@ function StaffTab({
 function AccountsTab({
   accounts,
   setAccounts,
-  sales
+  sales,
+  settings
 }) {
   const [selected, setSelected] = useState(null);
   const [addMode, setAddMode] = useState(false);
@@ -5102,6 +5284,8 @@ function AccountsTab({
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
   const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
   const totalOwed = acc => pendingOrders(acc).reduce((s, o) => s + o.total, 0);
+  const totalPaidFor = acc => (acc.payments || []).reduce((s, p) => s + p.amount, 0);
+  const outstandingBalance = acc => Math.max(0, totalOwed(acc) - totalPaidFor(acc));
   const recordPayment = () => {
     if (!acc || !pmtAmount) return;
     const pmt = {
@@ -5243,7 +5427,7 @@ function AccountsTab({
       textAlign: "center"
     }
   }, "No accounts yet. Add your first account to start taking orders on credit."), accounts.map(a => {
-    const owed = totalOwed(a);
+    const owed = outstandingBalance(a);
     const isSelected = selected === a.id;
     return /*#__PURE__*/React.createElement("div", {
       key: a.id,
@@ -5343,7 +5527,7 @@ function AccountsTab({
       fontWeight: 800,
       color: C.red
     }
-  }, fmt(totalOwed(acc))), /*#__PURE__*/React.createElement("div", {
+  }, fmt(outstandingBalance(acc))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: C.charcoal
@@ -7113,6 +7297,7 @@ function CateringTab({
 // -- END OF DAY ---------------------------------------------------------------
 function EODTab({
   sales,
+  setSales,
   settings,
   refunds,
   setRefunds,
@@ -7135,10 +7320,23 @@ function EODTab({
   const [refundReason, setRefundReason] = useState("");
   const [refundMethod, setRefundMethod] = useState("Cash");
   const [refundPin, setRefundPin] = useState(null); // pending refund needing PIN
+  // Fix mis-dated orders (e.g. late-evening orders that landed on the next day)
+  const [moveFrom, setMoveFrom] = useState(today());
+  const [moveTo, setMoveTo] = useState(today());
+  const [moveConfirm, setMoveConfirm] = useState(false);
+  const moveCount = sales.filter(s => s.date === moveFrom).length;
+  const doMoveDate = () => {
+    setSales(prev => prev.map(s => s.date === moveFrom ? {
+      ...s,
+      date: moveTo
+    } : s));
+    setMoveConfirm(false);
+    setSelDate(moveTo);
+  };
 
   // Only PAID sales count for EOD balancing (On Account is deferred)
   const allDay = sales.filter(s => s.date === selDate);
-  const paidDay = allDay.filter(s => s.paymentStatus !== "on-account");
+  const paidDay = allDay.filter(s => s.paymentStatus === "paid");
   const deferredDay = allDay.filter(s => s.paymentStatus === "on-account");
   const dayRefunds = (refunds || []).filter(r => r.date === selDate);
 
@@ -7398,7 +7596,79 @@ function EODTab({
     onClick: () => setEodSec("transactions"),
     color: eodSec === "transactions" ? C.blue : C.charcoal,
     outline: eodSec !== "transactions"
-  }, "Transactions (", allDay.length, ")"))), eodSec === "balance" && /*#__PURE__*/React.createElement("div", {
+  }, "Transactions (", allDay.length, ")"))), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      background: "#FFF8E1",
+      border: "1px solid " + C.gold,
+      marginBottom: 14,
+      padding: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: C.charcoal,
+      marginBottom: 8
+    }
+  }, "Fix mis-dated orders (e.g. a late order that landed on the wrong day)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12
+    }
+  }, "Move orders dated"), /*#__PURE__*/React.createElement(Inp, {
+    type: "date",
+    value: moveFrom,
+    onChange: v => {
+      setMoveFrom(v);
+      setMoveConfirm(false);
+    },
+    style: {
+      maxWidth: 160
+    }
+  }), /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12
+    }
+  }, "to"), /*#__PURE__*/React.createElement(Inp, {
+    type: "date",
+    value: moveTo,
+    onChange: v => {
+      setMoveTo(v);
+      setMoveConfirm(false);
+    },
+    style: {
+      maxWidth: 160
+    }
+  }), !moveConfirm ? /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => {
+      if (moveFrom !== moveTo && moveCount > 0) setMoveConfirm(true);
+    },
+    style: {
+      opacity: moveFrom === moveTo || moveCount === 0 ? 0.5 : 1
+    }
+  }, "Move ", moveCount, " order", moveCount === 1 ? "" : "s") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.red,
+      fontWeight: 700
+    }
+  }, "Move ", moveCount, " order", moveCount === 1 ? "" : "s", " from ", moveFrom, " to ", moveTo, "?"), /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: doMoveDate,
+    color: C.red
+  }, "Confirm"), /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => setMoveConfirm(false),
+    color: C.charcoal,
+    outline: true
+  }, "Cancel")))), eodSec === "balance" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -7616,7 +7886,7 @@ function EODTab({
       }
     }, /*#__PURE__*/React.createElement(Badge, {
       small: true,
-      color: s.paymentStatus === "on-account" ? C.orange : C.green
+      color: s.paymentStatus === "on-account" ? C.orange : s.paymentStatus === "unpaid" ? C.red : C.green
     }, s.orderType)), /*#__PURE__*/React.createElement("td", {
       style: {
         padding: "8px 12px",
@@ -7908,7 +8178,7 @@ function ReportsTab({
   const [selMonth, setSelMonth] = useState(today().slice(0, 7));
   const proj = settings.projections || {};
   // Only count COLLECTED revenue (exclude on-account until paid)
-  const paidSales = sales.filter(s => s.paymentStatus !== "on-account");
+  const paidSales = sales.filter(s => s.paymentStatus === "paid");
   const allAccPmts = (accounts || []).flatMap(a => a.payments || []);
   const mRev = {},
     mExp = {};
@@ -10221,9 +10491,11 @@ function App() {
   }), tab === "accounts" && /*#__PURE__*/React.createElement(AccountsTab, {
     accounts: accounts,
     setAccounts: setAccounts,
-    sales: sales
+    sales: sales,
+    settings: settings
   }), tab === "eod" && /*#__PURE__*/React.createElement(EODTab, {
     sales: sales,
+    setSales: setSales,
     settings: settings,
     refunds: refunds,
     setRefunds: setRefunds,
