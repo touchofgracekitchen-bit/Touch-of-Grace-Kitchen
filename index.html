@@ -5131,7 +5131,8 @@ function AccountsTab({
   const [pmtSaved, setPmtSaved] = useState(false);
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
   const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
-  const totalOwed = acc => pendingOrders(acc).reduce((s, o) => s + o.total, 0);
+  const totalPayments = acc => (acc.payments || []).reduce((s, p) => s + p.amount, 0);
+  const totalOwed = acc => Math.max(0, onAccountOrders(acc).reduce((s, o) => s + o.total, 0) - totalPayments(acc));
   const recordPayment = () => {
     if (!acc || !pmtAmount) return;
     const pmt = {
@@ -5751,7 +5752,7 @@ function AccountsTab({
     style: {
       background: C.green
     }
-  }, ["Date", "Amount", "Method", "Note"].map(h => /*#__PURE__*/React.createElement("th", {
+  }, ["Date", "Amount", "Method", "Note", ""].map(h => /*#__PURE__*/React.createElement("th", {
     key: h,
     style: {
       color: C.white,
@@ -5785,7 +5786,22 @@ function AccountsTab({
       fontSize: 12,
       color: C.charcoal
     }
-  }, p.note || "--")))), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
+  }, p.note || "--"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    small: true,
+    onClick: () => {
+      if (!window.confirm("Delete this payment of " + fmt(p.amount) + "? This will increase the account balance owed.")) return;
+      setAccounts(accounts.map(a => a.id === acc.id ? {
+        ...a,
+        payments: (a.payments || []).filter(x => x.id !== p.id)
+      } : a));
+    },
+    color: C.red,
+    outline: true
+  }, "Delete"))))), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
     style: {
       background: C.lightGold
     }
@@ -5802,7 +5818,7 @@ function AccountsTab({
       color: C.green
     }
   }, fmt(totalPaid)), /*#__PURE__*/React.createElement("td", {
-    colSpan: 2
+    colSpan: 3
   })))))), view === "invoice" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Generate Invoice for ", acc.name), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -7275,7 +7291,7 @@ function CateringTab({
     style: {
       background: C.green
     }
-  }, ["Date", "Amount", "Method", "Note"].map(h => /*#__PURE__*/React.createElement("th", {
+  }, ["Date", "Amount", "Method", "Note", ""].map(h => /*#__PURE__*/React.createElement("th", {
     key: h,
     style: {
       color: C.white,
