@@ -7,12 +7,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
   <title>Touch of Grace Kitchen</title>
-  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Georgia, serif; background: #F0EBE0; }
-    @media print {
-      body * { visibility: hidden; }
-      #receipt-print-area, #receipt-print-area * { visibility: visible; }
-      #receipt-print-area { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 12px; }
-    }
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: #F0EBE0; }
+    @media print { @page { margin: 1cm; size: A4; } }
   </style>
 </head>
 <body>
@@ -1347,10 +1345,7 @@ const POSITIONS_INIT = [{
 const fmt = n => "$" + Number(n || 0).toFixed(2);
 const today = () => {
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 };
 const nowStr = () => new Date().toLocaleTimeString("en-CA", {
   hour: "2-digit",
@@ -1810,98 +1805,6 @@ function CustomizeModal({
   }, "Cancel"))));
 }
 
-// -- COLLECT PICKUP PAYMENT MODAL ---------------------------------------------
-function CollectPickupModal({
-  sale,
-  onConfirm,
-  onCancel
-}) {
-  const [method, setMethod] = useState("Card Machine");
-  const [cash, setCash] = useState("");
-  const change = parseFloat(cash || 0) - sale.total;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0,0,0,0.7)",
-      zIndex: 999,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: 16
-    }
-  }, /*#__PURE__*/React.createElement(Card, {
-    style: {
-      width: 360,
-      border: "2px solid " + C.gold
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800,
-      fontSize: 16,
-      marginBottom: 4
-    }
-  }, "Collect Payment"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      color: C.charcoal,
-      marginBottom: 12
-    }
-  }, sale.customerName, " - Order #", sale.orderNumber), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.lightGold,
-      borderRadius: 8,
-      padding: 10,
-      marginBottom: 12,
-      textAlign: "center",
-      fontSize: 22,
-      fontWeight: 800,
-      color: C.green
-    }
-  }, fmt(sale.total)), /*#__PURE__*/React.createElement(Sel, {
-    value: method,
-    onChange: setMethod,
-    options: ["Card Machine", "Cash", "Transfer"],
-    style: {
-      marginBottom: 8
-    }
-  }), method === "Cash" && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement(Inp, {
-    type: "number",
-    value: cash,
-    onChange: setCash,
-    placeholder: "Cash given by customer"
-  }), parseFloat(cash) >= sale.total && /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: C.green,
-      fontWeight: 700,
-      fontSize: 13,
-      marginTop: 4
-    }
-  }, "Change: ", fmt(change))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      marginTop: 8
-    }
-  }, /*#__PURE__*/React.createElement(Btn, {
-    onClick: () => onConfirm(method, cash),
-    style: {
-      flex: 1
-    }
-  }, "Confirm Payment"), /*#__PURE__*/React.createElement(Btn, {
-    onClick: onCancel,
-    color: C.charcoal,
-    outline: true
-  }, "Cancel"))));
-}
-
 // -- POS TAB ------------------------------------------------------------------
 function POSTab({
   menu,
@@ -1911,9 +1814,7 @@ function POSTab({
   kitchenOrders,
   setKitchenOrders,
   staff,
-  positions,
-  sales,
-  onCollectPayment
+  positions
 }) {
   const [order, setOrder] = useState([]);
   const [note, setNote] = useState("");
@@ -1924,9 +1825,6 @@ function POSTab({
   const [filterCat, setFilterCat] = useState("All");
   const [customItem, setCustomItem] = useState(null);
   const [receipt, setReceipt] = useState(null);
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [collectingSale, setCollectingSale] = useState(null);
   const [orderNum, setOrderNum] = useState(() => 100 + Math.floor(Math.random() * 900));
   // Discount state
   const [showDiscount, setShowDiscount] = useState(false);
@@ -1997,7 +1895,6 @@ function POSTab({
     setCashGiven("");
     setReceipt(null);
     setAccountId("");
-    setCustomerName("");
     setShowDiscount(false);
     setDiscountValue("");
     setDiscountItemIdx("");
@@ -2009,10 +1906,6 @@ function POSTab({
     // Complimentary requires auth
     if (isComp && !compAuth) {
       setPinGate("complimentary");
-      return;
-    }
-    // Pay at Pickup requires a customer name so staff know who to collect from
-    if (!isComp && payMethod === "Pay at Pickup" && !customerName.trim()) {
       return;
     }
     const num = orderNum;
@@ -2039,9 +1932,8 @@ function POSTab({
       total: parseFloat((total || 0).toFixed(2)),
       orderType,
       payMethod: effectivePayMethod,
-      paymentStatus: effectivePayMethod === "On Account" ? "on-account" : effectivePayMethod === "Pay at Pickup" ? "unpaid" : "paid",
+      paymentStatus: effectivePayMethod === "On Account" ? "on-account" : "paid",
       accountId: effectivePayMethod === "On Account" ? parseInt(accountId) : null,
-      customerName: effectivePayMethod === "Pay at Pickup" ? customerName.trim() : "",
       discount,
       note
     };
@@ -2056,7 +1948,6 @@ function POSTab({
     setNote("");
     setCashGiven("");
     setAccountId("");
-    setCustomerName("");
     setShowDiscount(false);
     setDiscountValue("");
     setDiscountItemIdx("");
@@ -2064,106 +1955,6 @@ function POSTab({
     setCompAuth(null);
   };
   const activeAccounts = accounts.filter(a => a.active);
-  const pendingPickups = (sales || []).filter(s => s.paymentStatus === "unpaid").sort((a, b) => a.id - b.id);
-  const confirmCollectPayment = (method, cashGivenAmt) => {
-    if (!collectingSale) return;
-    onCollectPayment(collectingSale.id, method, parseFloat(cashGivenAmt) || 0);
-    setCollectingSale(null);
-  };
-  const buildReceiptText = r => {
-    const lines = [];
-    lines.push(settings.business.name);
-    if (settings.business.address) lines.push(settings.business.address);
-    if (settings.business.phone) lines.push(settings.business.phone);
-    if (settings.business.gstNumber) lines.push("GST# " + settings.business.gstNumber);
-    lines.push("");
-    lines.push("Order #" + r.orderNumber + " - " + r.date + " " + r.time + " - " + r.orderType);
-    lines.push("------------------------------");
-    r.items.forEach(i => {
-      lines.push(i.qty + "x " + i.name + (i.customization ? " (" + i.customization + ")" : "") + " - " + fmt(i.price * i.qty));
-    });
-    lines.push("------------------------------");
-    lines.push("Subtotal: " + fmt(r.subtotal));
-    if (r.discount) {
-      lines.push(r.discount.label + ": -" + fmt(r.discount.amount));
-    } else {
-      lines.push("GST (" + settings.taxes.gst + "%): " + fmt(r.gst));
-      lines.push("PST (" + settings.taxes.pst + "%): " + fmt(r.pst));
-    }
-    lines.push("TOTAL: " + fmt(r.total));
-    if (r.payMethod === "Cash" && parseFloat(cashGiven) > 0) {
-      lines.push("Cash: " + fmt(cashGiven));
-      lines.push("Change: " + fmt(change));
-    }
-    lines.push("");
-    lines.push("Real Jamaican Flavour Made with Love");
-    return lines.join("\n");
-  };
-  const emailReceipt = () => {
-    if (!receipt) return;
-    const to = customerEmail.trim();
-    const subject = encodeURIComponent(settings.business.name + " - Receipt #" + receipt.orderNumber);
-    const body = encodeURIComponent(buildReceiptText(receipt));
-    window.location.href = "mailto:" + encodeURIComponent(to) + "?subject=" + subject + "&body=" + body;
-  };
-  // Shared so it shows on BOTH the order-confirmation screen and the main POS screen -
-  // staff shouldn't have to click "New Order" first just to see who still owes money.
-  const pendingPickupPanel = pendingPickups.length > 0 ? /*#__PURE__*/React.createElement(Card, {
-    style: {
-      marginTop: 16,
-      border: "2px solid " + C.orange
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800,
-      fontSize: 15,
-      color: C.orange,
-      marginBottom: 10
-    }
-  }, "⏳ Pending Pickup - Awaiting Payment (", pendingPickups.length, ")"), pendingPickups.map(s => /*#__PURE__*/React.createElement("div", {
-    key: s.id,
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      flexWrap: "wrap",
-      gap: 8,
-      padding: "10px 12px",
-      background: C.lightGold,
-      borderRadius: 8,
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 700,
-      fontSize: 14,
-      color: C.dark
-    }
-  }, s.customerName || "(no name)", " - Order #", s.orderNumber), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: C.charcoal
-    }
-  }, s.time, " - ", s.items.map(i => i.qty + "x " + i.name).join(", "))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 10
-    }
-  }, /*#__PURE__*/React.createElement("strong", {
-    style: {
-      color: C.red,
-      fontSize: 15
-    }
-  }, fmt(s.total)), /*#__PURE__*/React.createElement(Btn, {
-    small: true,
-    onClick: () => setCollectingSale(s)
-  }, "Collect Payment"))))) : null;
-  const collectPickupModalEl = collectingSale ? /*#__PURE__*/React.createElement(CollectPickupModal, {
-    sale: collectingSale,
-    onConfirm: confirmCollectPayment,
-    onCancel: () => setCollectingSale(null)
-  }) : null;
   if (receipt) {
     const acc = receipt.accountId ? accounts.find(a => a.id === receipt.accountId) : null;
     return /*#__PURE__*/React.createElement("div", {
@@ -2213,7 +2004,6 @@ function POSTab({
         color: C.green
       }
     }, "Discount: ", /*#__PURE__*/React.createElement("strong", null, receipt.discount.label))), /*#__PURE__*/React.createElement("div", {
-      id: "receipt-print-area",
       style: {
         background: C.lightGold,
         borderRadius: 8,
@@ -2324,53 +2114,73 @@ function POSTab({
       }
     }, "Real Jamaican Flavour Made with Love")), /*#__PURE__*/React.createElement("div", {
       style: {
-        background: receipt.paymentStatus === "unpaid" ? "#FFF3E0" : "#E8F5E9",
+        background: "#E8F5E9",
         borderRadius: 8,
         padding: 10,
         marginBottom: 12,
         textAlign: "center",
-        fontSize: 13,
-        fontWeight: receipt.paymentStatus === "unpaid" ? 700 : 400,
-        color: receipt.paymentStatus === "unpaid" ? C.orange : C.dark
+        fontSize: 13
       }
-    }, receipt.paymentStatus === "unpaid" ? "⏳ Sent to kitchen - payment due at pickup. Find it in \"Pending Pickup\" below to collect payment." : "Order sent to kitchen!"), /*#__PURE__*/React.createElement("div", {
+    }, "Order sent to kitchen!"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         gap: 8,
-        marginBottom: 10
+        marginBottom: 8
       }
     }, /*#__PURE__*/React.createElement(Btn, {
-      onClick: () => window.print(),
-      color: C.charcoal,
-      style: {
-        flex: 1
-      }
-    }, "🖨 Print Receipt"), /*#__PURE__*/React.createElement(Btn, {
-      onClick: emailReceipt,
+      onClick: () => {
+        const biz = settings.business || {};
+        const items = receipt.items.map(i => `<tr><td>${i.qty}x ${i.name}${i.customization ? " (" + i.customization + ")" : ""}</td><td style="text-align:right">$${(i.price * i.qty).toFixed(2)}</td></tr>`).join("");
+        const disc = receipt.discount ? `<tr><td>Discount (${receipt.discount.label})</td><td style="text-align:right">-$${(receipt.discountAmt || 0).toFixed(2)}</td></tr>` : "";
+        const gstLine = receipt.gst > 0 ? `<tr><td>GST</td><td style="text-align:right">$${(receipt.gst || 0).toFixed(2)}</td></tr>` : "";
+        const pstLine = receipt.pst > 0 ? `<tr><td>PST</td><td style="text-align:right">$${(receipt.pst || 0).toFixed(2)}</td></tr>` : "";
+        const payLine = receipt.payMethod === "Cash" && receipt.cashGiven ? `<tr><td>Cash Tendered</td><td style="text-align:right">$${parseFloat(receipt.cashGiven || 0).toFixed(2)}</td></tr><tr><td>Change</td><td style="text-align:right">$${(parseFloat(receipt.cashGiven || 0) - receipt.total).toFixed(2)}</td></tr>` : "";
+        const html = `<div style="font-family:monospace;font-size:13px;width:100%;max-width:320px;margin:0 auto">
+                <div style="text-align:center;font-weight:bold;font-size:15px">${biz.name || "Touch of Grace Kitchen"}</div>
+                ${biz.address ? `<div style="text-align:center;font-size:11px">${biz.address}</div>` : ""}
+                ${biz.phone ? `<div style="text-align:center;font-size:11px">${biz.phone}</div>` : ""}
+                ${biz.gstNumber ? `<div style="text-align:center;font-size:11px">GST# ${biz.gstNumber}</div>` : ""}
+                <div style="border-top:1px dashed #000;margin:6px 0"></div>
+                <div>Order #${receipt.orderNumber} — ${receipt.orderType}</div>
+                <div style="font-size:11px">${receipt.date} ${receipt.time}</div>
+                <div style="border-top:1px dashed #000;margin:6px 0"></div>
+                <table style="width:100%;border-collapse:collapse">${items}${disc}</table>
+                <div style="border-top:1px dashed #000;margin:6px 0"></div>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr><td>Subtotal</td><td style="text-align:right">$${(receipt.discountedSub || receipt.subtotal || 0).toFixed(2)}</td></tr>
+                  ${gstLine}${pstLine}
+                  <tr style="font-weight:bold;font-size:14px"><td>TOTAL</td><td style="text-align:right">$${(receipt.total || 0).toFixed(2)}</td></tr>
+                  <tr><td>Payment</td><td style="text-align:right">${receipt.payMethod || ""}</td></tr>
+                  ${payLine}
+                </table>
+                <div style="border-top:1px dashed #000;margin:6px 0"></div>
+                <div style="text-align:center;font-size:11px;margin-top:6px">Thank you for dining with us!</div>
+              </div>`;
+        let f = document.getElementById("receipt-print-frame");
+        if (!f) {
+          f = document.createElement("iframe");
+          f.id = "receipt-print-frame";
+          f.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:320px;height:600px;border:none;";
+          document.body.appendChild(f);
+        }
+        f.contentDocument.open();
+        f.contentDocument.write("<!DOCTYPE html><html><head><style>*{margin:0;padding:0;box-sizing:border-box}body{padding:8px}td{padding:2px 0}td:last-child{text-align:right}@media print{@page{size:80mm auto;margin:4mm}}</style></head><body>" + html + "</body></html>");
+        f.contentDocument.close();
+        setTimeout(() => {
+          f.contentWindow.focus();
+          f.contentWindow.print();
+        }, 400);
+      },
       color: C.blue,
       style: {
         flex: 1
       }
-    }, "📧 Email Receipt")), /*#__PURE__*/React.createElement("input", {
-      type: "email",
-      value: customerEmail,
-      onChange: e => setCustomerEmail(e.target.value),
-      placeholder: "Customer email (for Email Receipt)",
-      style: {
-        width: "100%",
-        padding: "10px 12px",
-        borderRadius: 8,
-        border: "1px solid " + C.border,
-        fontFamily: "inherit",
-        fontSize: 13,
-        marginBottom: 12
-      }
-    }), /*#__PURE__*/React.createElement(Btn, {
+    }, "🖨️ Print Receipt"), /*#__PURE__*/React.createElement(Btn, {
       onClick: clearOrder,
       style: {
-        width: "100%"
+        flex: 1
       }
-    }, "New Order")), pendingPickupPanel, collectPickupModalEl);
+    }, "New Order"))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2745,7 +2555,7 @@ function POSTab({
   }, /*#__PURE__*/React.createElement("span", null, "TOTAL"), /*#__PURE__*/React.createElement("span", null, fmt(total)))), !isComp && /*#__PURE__*/React.createElement(Sel, {
     value: payMethod,
     onChange: setPayMethod,
-    options: ["Card Machine", "Cash", "Transfer", "On Account", "Pay at Pickup"]
+    options: ["Card Machine", "Cash", "Transfer", "On Account"]
   }), isComp && /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.teal,
@@ -2768,17 +2578,7 @@ function POSTab({
       fontSize: 14,
       marginTop: 4
     }
-  }, "Change: ", fmt(change))), payMethod === "Pay at Pickup" && !isComp && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Inp, {
-    value: customerName,
-    onChange: setCustomerName,
-    placeholder: "Customer name (required)"
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: C.charcoal,
-      marginTop: 4
-    }
-  }, "Sent straight to the kitchen. Collect payment when they arrive from the \"Pending Pickup\" list below the menu.")), payMethod === "On Account" && !isComp && /*#__PURE__*/React.createElement("div", null, activeAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Change: ", fmt(change))), payMethod === "On Account" && !isComp && /*#__PURE__*/React.createElement("div", null, activeAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.lightRed,
       borderRadius: 8,
@@ -2786,14 +2586,24 @@ function POSTab({
       fontSize: 12,
       color: C.red
     }
-  }, "No accounts set up. Add in Accounts tab.") : /*#__PURE__*/React.createElement(Sel, {
+  }, "No accounts set up. Add in Accounts tab.") : /*#__PURE__*/React.createElement("select", {
     value: accountId,
-    onChange: setAccountId,
-    options: [""].concat(activeAccounts.map(a => String(a.id))),
+    onChange: e => setAccountId(e.target.value),
     style: {
-      width: "100%"
+      width: "100%",
+      padding: "8px 10px",
+      border: "1px solid " + C.border,
+      borderRadius: 6,
+      fontSize: 14,
+      background: C.cream,
+      fontFamily: "inherit"
     }
-  }), accountId && activeAccounts.find(a => String(a.id) === accountId) && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Select account..."), activeAccounts.map(a => /*#__PURE__*/React.createElement("option", {
+    key: a.id,
+    value: String(a.id)
+  }, a.name))), accountId && activeAccounts.find(a => String(a.id) === accountId) && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: C.charcoal,
@@ -2805,17 +2615,16 @@ function POSTab({
       width: "100%",
       padding: 14,
       fontSize: 15,
-      background: isComp ? C.teal : payMethod === "Pay at Pickup" ? C.orange : C.green,
-      opacity: payMethod === "Pay at Pickup" && !isComp && !customerName.trim() ? 0.6 : 1
+      background: isComp ? C.teal : C.green
     }
-  }, isComp ? "Complete - Complimentary" : payMethod === "Pay at Pickup" ? "Send to Kitchen - Pay Later (" + fmt(total) + ")" : "Place Order - " + fmt(total)), /*#__PURE__*/React.createElement(Btn, {
+  }, isComp ? "Complete - Complimentary" : "Place Order - " + fmt(total)), /*#__PURE__*/React.createElement(Btn, {
     onClick: clearOrder,
     color: C.red,
     outline: true,
     style: {
       width: "100%"
     }
-  }, "Clear"))), pendingPickupPanel, collectPickupModalEl);
+  }, "Clear"))));
 }
 
 // -- KITCHEN TAB --------------------------------------------------------------
@@ -4393,12 +4202,17 @@ function ExpensesTab({
       marginBottom: 14,
       fontSize: 13
     }
-  }, "BC Tax Note: GST 5% + PST 7% on most purchases. Est. GST on expenses: ", /*#__PURE__*/React.createElement("strong", null, fmt(total * 0.05)), ". Keep all receipts for Input Tax Credits."), /*#__PURE__*/React.createElement("div", {
+  }, (() => {
+    const tGST = filtered.reduce((s, e) => s + (e.gst || 0), 0);
+    const tPST = filtered.reduce((s, e) => s + (e.pst || 0), 0);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, "GST paid: ", /*#__PURE__*/React.createElement("strong", null, fmt(tGST)), " | PST paid: ", /*#__PURE__*/React.createElement("strong", null, fmt(tPST)), " | Total tax paid: ", /*#__PURE__*/React.createElement("strong", null, fmt(tGST + tPST)), ". Keep all receipts for Input Tax Credits.");
+  })()), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 10,
       alignItems: "center",
-      marginBottom: 14
+      marginBottom: 14,
+      flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("input", {
     type: "month",
@@ -4412,6 +4226,10 @@ function ExpensesTab({
       background: C.cream
     }
   }), /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => window.print(),
+    color: C.blue,
+    outline: true
+  }, "⬇ Download PDF"), /*#__PURE__*/React.createElement(Btn, {
     onClick: () => setAddMode(!addMode),
     style: {
       marginLeft: "auto"
@@ -4496,7 +4314,7 @@ function ExpensesTab({
     style: {
       background: C.green
     }
-  }, ["Date", "Category", "Description", "Supplier", "Amount", ""].map(h => /*#__PURE__*/React.createElement("th", {
+  }, ["Date", "Category", "Description", "Supplier", "Amount", "GST", "PST", ""].map(h => /*#__PURE__*/React.createElement("th", {
     key: h,
     style: {
       color: C.white,
@@ -4538,6 +4356,18 @@ function ExpensesTab({
       color: C.red
     }
   }, fmt(e.amount)), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 14px",
+      fontSize: 12,
+      color: C.charcoal
+    }
+  }, e.gst > 0 ? fmt(e.gst) : "-"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 14px",
+      fontSize: 12,
+      color: C.charcoal
+    }
+  }, e.pst > 0 ? fmt(e.pst) : "-"), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 14px"
     }
@@ -5265,7 +5095,10 @@ function AccountsTab({
   accounts,
   setAccounts,
   sales,
-  settings
+  onSaleComplete,
+  menu,
+  settings,
+  setKitchenOrders
 }) {
   const [selected, setSelected] = useState(null);
   const [addMode, setAddMode] = useState(false);
@@ -5282,6 +5115,16 @@ function AccountsTab({
     billingCycle: "weekly",
     notes: ""
   });
+  const [acOrder, setAcOrder] = useState([]);
+  const [acOrderCat, setAcOrderCat] = useState("All");
+  const [orderNum2, setOrderNum2] = useState(() => {
+    try {
+      const s = localStorage.getItem("tog_last_order_num");
+      return s ? parseInt(s) + 1 : 1001;
+    } catch (e) {
+      return 1001;
+    }
+  });
   const [pmtAmount, setPmtAmount] = useState("");
   const [pmtMethod, setPmtMethod] = useState("Transfer");
   const [pmtNote, setPmtNote] = useState("");
@@ -5289,8 +5132,6 @@ function AccountsTab({
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
   const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
   const totalOwed = acc => pendingOrders(acc).reduce((s, o) => s + o.total, 0);
-  const totalPaidFor = acc => (acc.payments || []).reduce((s, p) => s + p.amount, 0);
-  const outstandingBalance = acc => Math.max(0, totalOwed(acc) - totalPaidFor(acc));
   const recordPayment = () => {
     if (!acc || !pmtAmount) return;
     const pmt = {
@@ -5432,7 +5273,7 @@ function AccountsTab({
       textAlign: "center"
     }
   }, "No accounts yet. Add your first account to start taking orders on credit."), accounts.map(a => {
-    const owed = outstandingBalance(a);
+    const owed = totalOwed(a);
     const isSelected = selected === a.id;
     return /*#__PURE__*/React.createElement("div", {
       key: a.id,
@@ -5532,7 +5373,7 @@ function AccountsTab({
       fontWeight: 800,
       color: C.red
     }
-  }, fmt(outstandingBalance(acc))), /*#__PURE__*/React.createElement("div", {
+  }, fmt(totalOwed(acc))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: C.charcoal
@@ -5556,6 +5397,9 @@ function AccountsTab({
       flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => setView("new-order"),
+    color: view === "new-order" ? C.green : C.charcoal
+  }, "+ Place Order"), /*#__PURE__*/React.createElement(Btn, {
     onClick: () => setView("orders"),
     color: view === "orders" ? C.green : C.charcoal,
     outline: view !== "orders"
@@ -5574,7 +5418,193 @@ function AccountsTab({
     style: {
       marginLeft: "auto"
     }
-  }, "Delete Account")), view === "orders" && /*#__PURE__*/React.createElement(Card, {
+  }, "Delete Account")), view === "new-order" && (() => {
+    const cats2 = ["All", ...Array.from(new Set(menu.filter(m => m.available).map(m => m.cat)))];
+    const visible2 = menu.filter(m => m.available && (acOrderCat === "All" || m.cat === acOrderCat));
+    const acSubtotal = acOrder.reduce((s, i) => s + i.price * i.qty, 0);
+    const acGst = settings.taxes.gstEnabled !== false ? acSubtotal * (settings.taxes.gst / 100) : 0;
+    const acPst = settings.taxes.pstEnabled !== false ? acSubtotal * (settings.taxes.pst / 100) : 0;
+    const acTotal = acSubtotal + acGst + acPst;
+    const addToAcOrder = item => {
+      setAcOrder(prev => {
+        const ex = prev.find(o => o.name === item.name && !o.customization);
+        if (ex) return prev.map(o => o === ex ? {
+          ...o,
+          qty: o.qty + 1
+        } : o);
+        return [...prev, {
+          name: item.name,
+          price: item.price,
+          qty: 1,
+          cat: item.cat
+        }];
+      });
+    };
+    const placeAcOrder = () => {
+      if (acOrder.length === 0) return;
+      const num = orderNum2;
+      setOrderNum2(n => {
+        try {
+          localStorage.setItem("tog_last_order_num", n);
+        } catch (e) {}
+        return n + 1;
+      });
+      const sale = {
+        id: Date.now(),
+        orderNumber: num,
+        date: today(),
+        time: nowStr(),
+        items: [...acOrder],
+        subtotal: parseFloat(acSubtotal.toFixed(2)),
+        discountAmt: 0,
+        discountedSub: parseFloat(acSubtotal.toFixed(2)),
+        gst: parseFloat(acGst.toFixed(2)),
+        pst: parseFloat(acPst.toFixed(2)),
+        total: parseFloat(acTotal.toFixed(2)),
+        orderType: "Pickup",
+        payMethod: "On Account",
+        paymentStatus: "on-account",
+        accountId: acc.id,
+        discount: null,
+        note: "Ordered via Accounts tab"
+      };
+      onSaleComplete(sale);
+      if (setKitchenOrders) {
+        setKitchenOrders(prev => [...(prev || []), {
+          ...sale,
+          status: "new",
+          placedAt: Date.now(),
+          note: "Phone order - " + acc.name
+        }]);
+      }
+      setAcOrder([]);
+      setView("orders");
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "1fr 340px",
+        gap: 16
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap",
+        marginBottom: 12
+      }
+    }, cats2.map(c => /*#__PURE__*/React.createElement("button", {
+      key: c,
+      onClick: () => setAcOrderCat(c),
+      style: {
+        background: acOrderCat === c ? C.green : "transparent",
+        color: acOrderCat === c ? C.white : C.charcoal,
+        border: "1px solid " + C.border,
+        borderRadius: 20,
+        padding: "6px 14px",
+        fontSize: 12,
+        cursor: "pointer"
+      }
+    }, c))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))",
+        gap: 10
+      }
+    }, visible2.map(item => /*#__PURE__*/React.createElement("div", {
+      key: item.id,
+      onClick: () => addToAcOrder(item),
+      style: {
+        background: C.white,
+        border: "1px solid " + C.border,
+        borderRadius: 10,
+        padding: 12,
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        fontSize: 13,
+        color: C.dark
+      }
+    }, item.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: C.green,
+        fontWeight: 700,
+        fontSize: 14,
+        marginTop: 4
+      }
+    }, fmt(item.price)))))), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Order for ", acc.name), acOrder.length === 0 ? /*#__PURE__*/React.createElement("p", {
+      style: {
+        color: C.gray,
+        fontSize: 13,
+        textAlign: "center",
+        padding: 20
+      }
+    }, "Tap items to add") : /*#__PURE__*/React.createElement(React.Fragment, null, acOrder.map((o, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "6px 0",
+        borderBottom: "1px solid " + C.border,
+        fontSize: 13
+      }
+    }, /*#__PURE__*/React.createElement("span", null, o.qty, "x ", o.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", null, fmt(o.price * o.qty)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setAcOrder(acOrder.filter((_, idx) => idx !== i)),
+      style: {
+        background: "none",
+        border: "none",
+        color: C.red,
+        cursor: "pointer",
+        fontSize: 16
+      }
+    }, "×")))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 12,
+        paddingTop: 10,
+        borderTop: "1px solid " + C.border,
+        fontSize: 13
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between"
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "Subtotal"), /*#__PURE__*/React.createElement("span", null, fmt(acSubtotal))), acGst > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between"
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "GST"), /*#__PURE__*/React.createElement("span", null, fmt(acGst))), acPst > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between"
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "PST"), /*#__PURE__*/React.createElement("span", null, fmt(acPst))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        fontWeight: 800,
+        fontSize: 16,
+        marginTop: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "TOTAL"), /*#__PURE__*/React.createElement("span", null, fmt(acTotal)))), /*#__PURE__*/React.createElement(Btn, {
+      onClick: placeAcOrder,
+      style: {
+        width: "100%",
+        marginTop: 12
+      },
+      color: C.green
+    }, "Place Order — On Account"))));
+  })(), view === "orders" && /*#__PURE__*/React.createElement(Card, {
     style: {
       padding: 0,
       overflow: "hidden"
@@ -7320,28 +7350,17 @@ function EODTab({
   const [transferTotal, setTransferTotal] = useState("");
   const [notes, setNotes] = useState("");
   const [saved, setSaved] = useState(false);
+  // Restore saved values when date changes
+  const [lastLoadedDate, setLastLoadedDate] = useState(null);
   // Refund state
   const [refundOrder, setRefundOrder] = useState(null); // sale object being refunded
   const [refundReason, setRefundReason] = useState("");
   const [refundMethod, setRefundMethod] = useState("Cash");
   const [refundPin, setRefundPin] = useState(null); // pending refund needing PIN
-  // Fix mis-dated orders (e.g. late-evening orders that landed on the next day)
-  const [moveFrom, setMoveFrom] = useState(today());
-  const [moveTo, setMoveTo] = useState(today());
-  const [moveConfirm, setMoveConfirm] = useState(false);
-  const moveCount = sales.filter(s => s.date === moveFrom).length;
-  const doMoveDate = () => {
-    setSales(prev => prev.map(s => s.date === moveFrom ? {
-      ...s,
-      date: moveTo
-    } : s));
-    setMoveConfirm(false);
-    setSelDate(moveTo);
-  };
 
   // Only PAID sales count for EOD balancing (On Account is deferred)
   const allDay = sales.filter(s => s.date === selDate);
-  const paidDay = allDay.filter(s => s.paymentStatus === "paid");
+  const paidDay = allDay.filter(s => s.paymentStatus !== "on-account");
   const deferredDay = allDay.filter(s => s.paymentStatus === "on-account");
   const dayRefunds = (refunds || []).filter(r => r.date === selDate);
 
@@ -7362,6 +7381,15 @@ function EODTab({
   const cardVar = parseFloat(cardTotal || 0) - posCard;
   const balanced = Math.abs(cashVar) < 0.05 && Math.abs(cardVar) < 0.05;
   const existing = eodRecords.find(r => r.date === selDate);
+
+  // Restore physical count values when switching dates
+  if (lastLoadedDate !== selDate) {
+    setLastLoadedDate(selDate);
+    setCashCounted(existing ? String(existing.cashCounted || "") : "");
+    setCardTotal(existing ? String(existing.cardTotal || "") : "");
+    setTransferTotal(existing ? String(existing.transferTotal || "") : "");
+    setNotes(existing ? existing.notes || "" : "");
+  }
   const saveEOD = () => {
     const rec = {
       id: Date.now(),
@@ -7601,79 +7629,7 @@ function EODTab({
     onClick: () => setEodSec("transactions"),
     color: eodSec === "transactions" ? C.blue : C.charcoal,
     outline: eodSec !== "transactions"
-  }, "Transactions (", allDay.length, ")"))), /*#__PURE__*/React.createElement(Card, {
-    style: {
-      background: "#FFF8E1",
-      border: "1px solid " + C.gold,
-      marginBottom: 14,
-      padding: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: C.charcoal,
-      marginBottom: 8
-    }
-  }, "Fix mis-dated orders (e.g. a late order that landed on the wrong day)"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("label", {
-    style: {
-      fontSize: 12
-    }
-  }, "Move orders dated"), /*#__PURE__*/React.createElement(Inp, {
-    type: "date",
-    value: moveFrom,
-    onChange: v => {
-      setMoveFrom(v);
-      setMoveConfirm(false);
-    },
-    style: {
-      maxWidth: 160
-    }
-  }), /*#__PURE__*/React.createElement("label", {
-    style: {
-      fontSize: 12
-    }
-  }, "to"), /*#__PURE__*/React.createElement(Inp, {
-    type: "date",
-    value: moveTo,
-    onChange: v => {
-      setMoveTo(v);
-      setMoveConfirm(false);
-    },
-    style: {
-      maxWidth: 160
-    }
-  }), !moveConfirm ? /*#__PURE__*/React.createElement(Btn, {
-    small: true,
-    onClick: () => {
-      if (moveFrom !== moveTo && moveCount > 0) setMoveConfirm(true);
-    },
-    style: {
-      opacity: moveFrom === moveTo || moveCount === 0 ? 0.5 : 1
-    }
-  }, "Move ", moveCount, " order", moveCount === 1 ? "" : "s") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.red,
-      fontWeight: 700
-    }
-  }, "Move ", moveCount, " order", moveCount === 1 ? "" : "s", " from ", moveFrom, " to ", moveTo, "?"), /*#__PURE__*/React.createElement(Btn, {
-    small: true,
-    onClick: doMoveDate,
-    color: C.red
-  }, "Confirm"), /*#__PURE__*/React.createElement(Btn, {
-    small: true,
-    onClick: () => setMoveConfirm(false),
-    color: C.charcoal,
-    outline: true
-  }, "Cancel")))), eodSec === "balance" && /*#__PURE__*/React.createElement("div", {
+  }, "Transactions (", allDay.length, ")"))), eodSec === "balance" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -7713,13 +7669,17 @@ function EODTab({
       display: "flex",
       justifyContent: "space-between"
     }
-  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), accPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      color: C.green
-    }
-  }, /*#__PURE__*/React.createElement("span", null, "Account Payments"), /*#__PURE__*/React.createElement("strong", null, fmt(accPmtTotal))), catPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), accPmtTotal > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, ["Cash", "Card Machine", "Transfer", "Other"].map(method => {
+    const mTotal = dayAccPmts.filter(p => p.method === method).reduce((s, p) => s + p.amount, 0);
+    return mTotal > 0 ? /*#__PURE__*/React.createElement("div", {
+      key: method,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        color: C.green
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "Account Payments (", method, ")"), /*#__PURE__*/React.createElement("strong", null, fmt(mTotal))) : null;
+  })), catPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -7863,7 +7823,7 @@ function EODTab({
       textAlign: "center",
       color: C.gray
     }
-  }, "No orders for this date.")), allDay.sort((a, b) => a.time.localeCompare(b.time)).map((s, i) => {
+  }, "No orders for this date.")), allDay.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).map((s, i) => {
     const isRefunded = (refunds || []).some(r => r.originalSaleId === s.id);
     return /*#__PURE__*/React.createElement("tr", {
       key: s.id,
@@ -7891,13 +7851,33 @@ function EODTab({
       }
     }, /*#__PURE__*/React.createElement(Badge, {
       small: true,
-      color: s.paymentStatus === "on-account" ? C.orange : s.paymentStatus === "unpaid" ? C.red : C.green
+      color: s.paymentStatus === "on-account" ? C.orange : C.green
     }, s.orderType)), /*#__PURE__*/React.createElement("td", {
       style: {
-        padding: "8px 12px",
-        color: C.charcoal
+        padding: "8px 12px"
       }
-    }, s.payMethod), /*#__PURE__*/React.createElement("td", {
+    }, /*#__PURE__*/React.createElement("select", {
+      value: s.payMethod || "",
+      onChange: e => {
+        const updated = sales.map(x => x.id === s.id ? {
+          ...x,
+          payMethod: e.target.value,
+          paymentStatus: e.target.value === "On Account" ? "on-account" : "paid"
+        } : x);
+        setSales(updated);
+      },
+      style: {
+        border: "1px solid " + C.border,
+        borderRadius: 4,
+        padding: "2px 4px",
+        fontSize: 11,
+        background: C.cream,
+        fontFamily: "inherit"
+      }
+    }, ["Card Machine", "Cash", "Transfer", "On Account"].map(m => /*#__PURE__*/React.createElement("option", {
+      key: m,
+      value: m
+    }, m)))), /*#__PURE__*/React.createElement("td", {
       style: {
         padding: "8px 12px"
       }
@@ -8183,7 +8163,7 @@ function ReportsTab({
   const [selMonth, setSelMonth] = useState(today().slice(0, 7));
   const proj = settings.projections || {};
   // Only count COLLECTED revenue (exclude on-account until paid)
-  const paidSales = sales.filter(s => s.paymentStatus === "paid");
+  const paidSales = sales.filter(s => s.paymentStatus !== "on-account");
   const allAccPmts = (accounts || []).flatMap(a => a.payments || []);
   const mRev = {},
     mExp = {};
@@ -8222,8 +8202,18 @@ function ReportsTab({
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
+      justifyContent: "flex-end",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => window.print(),
+    color: C.blue,
+    outline: true
+  }, "⬇ Download PDF")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
       gap: 8,
-      marginBottom: 18,
+      marginBottom: 12,
       flexWrap: "wrap"
     }
   }, [["monthly", "Monthly Overview"], ["detail", "Monthly Detail"], ["cost", "Cost Analysis"], ["expenses", "Expense Trends"], ["adjustments", "Adjustments"], ["tax", "Tax Summary"], ["variance", "Inventory Variance"]].map(([v, l]) => /*#__PURE__*/React.createElement("button", {
@@ -10497,7 +10487,10 @@ function App() {
     accounts: accounts,
     setAccounts: setAccounts,
     sales: sales,
-    settings: settings
+    onSaleComplete: handleSale,
+    menu: menu,
+    settings: settings,
+    setKitchenOrders: setKitchenOrders
   }), tab === "eod" && /*#__PURE__*/React.createElement(EODTab, {
     sales: sales,
     setSales: setSales,
@@ -10533,7 +10526,7 @@ try {
   ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 } catch(e) {
   document.getElementById('root').innerHTML = '<div style="padding:40px;text-align:center;font-family:Georgia,serif"><div style="font-size:40px">&#x1F37D;</div><h2 style="margin:16px 0 8px">Loading Error</h2><p style="color:#666;font-size:14px">' + e.message + '</p><button onclick="location.reload()" style="margin-top:16px;background:#1B5E20;color:white;border:none;border-radius:8px;padding:12px 24px;font-size:14px;cursor:pointer">Reload</button></div>';
-  console.error('App error:', e);
+  console.error("App error:", e);
 }
   </script>
 </body>
