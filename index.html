@@ -5132,7 +5132,11 @@ function AccountsTab({
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
   const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
   const totalPayments = acc => (acc.payments || []).reduce((s, p) => s + p.amount, 0);
-  const totalOwed = acc => Math.max(0, onAccountOrders(acc).reduce((s, o) => s + o.total, 0) - totalPayments(acc));
+  const totalOwed = acc => {
+    const ordersCents = Math.round(onAccountOrders(acc).reduce((s, o) => s + o.total, 0) * 100);
+    const paidCents = Math.round(totalPayments(acc) * 100);
+    return Math.max(0, ordersCents - paidCents) / 100;
+  };
   const recordPayment = () => {
     if (!acc || !pmtAmount) return;
     const pmt = {
@@ -5670,9 +5674,24 @@ function AccountsTab({
     style: {
       padding: "8px 14px"
     }
-  }, /*#__PURE__*/React.createElement(Badge, {
-    color: o.invoiced ? C.green : C.orange
-  }, o.invoiced ? "Invoiced" : "Pending"))))))), view === "payment" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Record Payment from ", acc.name), /*#__PURE__*/React.createElement("div", {
+  }, (() => {
+    const chron = [...accOrders].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    let remaining = Math.round(totalPayments(acc) * 100);
+    let isSettled = false;
+    for (const ord of chron) {
+      const ordCents = Math.round(ord.total * 100);
+      if (remaining >= ordCents) {
+        remaining -= ordCents;
+        if (ord.id === o.id) isSettled = true;
+      } else {
+        if (ord.id === o.id) isSettled = false;
+        break;
+      }
+    }
+    return /*#__PURE__*/React.createElement(Badge, {
+      color: isSettled ? C.green : C.orange
+    }, isSettled ? "Settled" : "Pending");
+  })())))))), view === "payment" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Record Payment from ", acc.name), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#E8F5E9",
       borderRadius: 8,
@@ -7872,13 +7891,19 @@ function EODTab({
       style: {
         padding: "8px 12px"
       }
-    }, /*#__PURE__*/React.createElement("select", {
+    }, s.paymentStatus === "on-account" ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: C.orange,
+        fontStyle: "italic"
+      },
+      title: "Settle this in the Accounts tab — do not edit here"
+    }, "On Account") : /*#__PURE__*/React.createElement("select", {
       value: s.payMethod || "",
       onChange: e => {
         const updated = sales.map(x => x.id === s.id ? {
           ...x,
-          payMethod: e.target.value,
-          paymentStatus: e.target.value === "On Account" ? "on-account" : "paid"
+          payMethod: e.target.value
         } : x);
         setSales(updated);
       },
@@ -7890,7 +7915,7 @@ function EODTab({
         background: C.cream,
         fontFamily: "inherit"
       }
-    }, ["Card Machine", "Cash", "Transfer", "On Account"].map(m => /*#__PURE__*/React.createElement("option", {
+    }, ["Card Machine", "Cash", "Transfer"].map(m => /*#__PURE__*/React.createElement("option", {
       key: m,
       value: m
     }, m)))), /*#__PURE__*/React.createElement("td", {
