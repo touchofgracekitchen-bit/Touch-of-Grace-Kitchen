@@ -7450,10 +7450,14 @@ function EODTab({
   const accPmtTotal = dayAccPmts.reduce((s, p) => s + p.amount, 0);
   const dayCatPmts = (cateringEvents || []).flatMap(e => (e.payments || []).filter(p => p.date === selDate));
   const catPmtTotal = dayCatPmts.reduce((s, p) => s + p.amount, 0);
-  const posCash = paidDay.filter(s => s.payMethod === "Cash").reduce((s, x) => s + x.total, 0);
-  const posCard = paidDay.filter(s => s.payMethod === "Card Machine").reduce((s, x) => s + x.total, 0);
-  const posTransf = paidDay.filter(s => s.payMethod === "Transfer").reduce((s, x) => s + x.total, 0);
-  const posTotal = paidDay.reduce((s, x) => s + x.total, 0) + accPmtTotal + catPmtTotal;
+
+  // Every dollar collected today, regardless of which tab it came from
+  // (POS, Accounts, or Catering), is folded into exactly one of 3 buckets:
+  // Cash, Card Machine, or Transfer. "On Account" is a status, never a bucket.
+  const posCash = paidDay.filter(s => s.payMethod === "Cash").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Cash").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Cash").reduce((s, p) => s + p.amount, 0);
+  const posCard = paidDay.filter(s => s.payMethod === "Card Machine").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Card Machine").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Card Machine").reduce((s, p) => s + p.amount, 0);
+  const posTransf = paidDay.filter(s => s.payMethod === "Transfer").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Transfer").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Transfer").reduce((s, p) => s + p.amount, 0);
+  const posTotal = posCash + posCard + posTransf;
   const posGST = paidDay.reduce((s, x) => s + x.gst, 0);
   const posPST = paidDay.reduce((s, x) => s + x.pst, 0);
   const refundTotal = dayRefunds.reduce((s, r) => s + r.amount, 0);
@@ -7740,7 +7744,7 @@ function EODTab({
       display: "flex",
       justifyContent: "space-between"
     }
-  }, /*#__PURE__*/React.createElement("span", null, "Cash Sales"), /*#__PURE__*/React.createElement("strong", null, fmt(posCash))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "Cash"), /*#__PURE__*/React.createElement("strong", null, fmt(posCash))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between"
@@ -7750,33 +7754,17 @@ function EODTab({
       display: "flex",
       justifyContent: "space-between"
     }
-  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), accPmtTotal > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, ["Cash", "Card Machine", "Transfer"].map(method => {
-    const mTotal = dayAccPmts.filter(p => p.method === method).reduce((s, p) => s + p.amount, 0);
-    return mTotal > 0 ? /*#__PURE__*/React.createElement("div", {
-      key: method,
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        color: C.green
-      }
-    }, /*#__PURE__*/React.createElement("span", null, "Account Payments (", method, ")"), /*#__PURE__*/React.createElement("strong", null, fmt(mTotal))) : null;
-  }), (() => {
+  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), (() => {
     const known = ["Cash", "Card Machine", "Transfer"];
-    const leftover = dayAccPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0);
+    const leftover = dayAccPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0);
     return leftover > 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         justifyContent: "space-between",
         color: C.red
       }
-    }, /*#__PURE__*/React.createElement("span", null, "Account Payments (unlabeled — check Accounts)"), /*#__PURE__*/React.createElement("strong", null, fmt(leftover))) : null;
-  })()), catPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      color: C.teal
-    }
-  }, /*#__PURE__*/React.createElement("span", null, "Catering Payments"), /*#__PURE__*/React.createElement("strong", null, fmt(catPmtTotal))), /*#__PURE__*/React.createElement("hr", {
+    }, /*#__PURE__*/React.createElement("span", null, "Unlabeled payment — check Accounts/Catering"), /*#__PURE__*/React.createElement("strong", null, fmt(leftover))) : null;
+  })(), /*#__PURE__*/React.createElement("hr", {
     style: {
       border: "1px solid " + C.border,
       margin: "2px 0"
