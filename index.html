@@ -7750,7 +7750,7 @@ function EODTab({
       display: "flex",
       justifyContent: "space-between"
     }
-  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), accPmtTotal > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, ["Cash", "Card Machine", "Transfer", "Other"].map(method => {
+  }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), accPmtTotal > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, ["Cash", "Card Machine", "Transfer"].map(method => {
     const mTotal = dayAccPmts.filter(p => p.method === method).reduce((s, p) => s + p.amount, 0);
     return mTotal > 0 ? /*#__PURE__*/React.createElement("div", {
       key: method,
@@ -7760,7 +7760,17 @@ function EODTab({
         color: C.green
       }
     }, /*#__PURE__*/React.createElement("span", null, "Account Payments (", method, ")"), /*#__PURE__*/React.createElement("strong", null, fmt(mTotal))) : null;
-  })), catPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
+  }), (() => {
+    const known = ["Cash", "Card Machine", "Transfer"];
+    const leftover = dayAccPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0);
+    return leftover > 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        color: C.red
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "Account Payments (unlabeled — check Accounts)"), /*#__PURE__*/React.createElement("strong", null, fmt(leftover))) : null;
+  })()), catPmtTotal > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -7937,31 +7947,29 @@ function EODTab({
       style: {
         padding: "8px 12px"
       }
-    }, s.paymentStatus === "on-account" ? /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11,
-        color: C.orange,
-        fontStyle: "italic"
-      },
-      title: "Settle this in the Accounts tab — do not edit here"
-    }, "On Account") : /*#__PURE__*/React.createElement("select", {
+    }, /*#__PURE__*/React.createElement("select", {
       value: s.payMethod || "",
       onChange: e => {
+        const newMethod = e.target.value;
+        if (s.paymentStatus === "on-account" && newMethod !== "On Account") {
+          if (!window.confirm("This will mark order #" + s.orderNumber + " as paid via " + newMethod + " directly.\n\nOnly do this if you have NOT already recorded a payment for it in the Accounts tab — doing both will double-count the revenue.\n\nContinue?")) return;
+        }
         const updated = sales.map(x => x.id === s.id ? {
           ...x,
-          payMethod: e.target.value
+          payMethod: newMethod,
+          paymentStatus: newMethod === "On Account" ? "on-account" : "paid"
         } : x);
         setSales(updated);
       },
       style: {
-        border: "1px solid " + C.border,
+        border: "1px solid " + (s.paymentStatus === "on-account" ? C.orange : C.border),
         borderRadius: 4,
         padding: "2px 4px",
         fontSize: 11,
-        background: C.cream,
+        background: s.paymentStatus === "on-account" ? "#FFF3E0" : C.cream,
         fontFamily: "inherit"
       }
-    }, ["Card Machine", "Cash", "Transfer"].map(m => /*#__PURE__*/React.createElement("option", {
+    }, ["Card Machine", "Cash", "Transfer", "On Account"].map(m => /*#__PURE__*/React.createElement("option", {
       key: m,
       value: m
     }, m)))), /*#__PURE__*/React.createElement("td", {
@@ -10347,6 +10355,39 @@ function App() {
     setSales(prev => [...prev, sale]);
     deductInventory(sale.items);
   };
+
+  // One-time repair: fix any account payments saved with old method names
+  // ("Card" -> "Card Machine", "Cheque" -> "Transfer") so historical data
+  // displays correctly in EOD instead of hiding under no line item.
+  useEffect(() => {
+    if (!accounts || accounts.length === 0) return;
+    let needsFix = false;
+    const fixed = accounts.map(a => {
+      if (!a.payments || a.payments.length === 0) return a;
+      const newPayments = a.payments.map(p => {
+        if (p.method === "Card") {
+          needsFix = true;
+          return {
+            ...p,
+            method: "Card Machine"
+          };
+        }
+        if (p.method === "Cheque") {
+          needsFix = true;
+          return {
+            ...p,
+            method: "Transfer"
+          };
+        }
+        return p;
+      });
+      return {
+        ...a,
+        payments: newPayments
+      };
+    });
+    if (needsFix) setAccounts(fixed);
+  }, [accounts.length]);
   const newOrderCount = kitchenOrders.filter(o => o.status === "new").length;
   const readyOrderCount = kitchenOrders.filter(o => o.status === "ready").length;
   return /*#__PURE__*/React.createElement("div", {
