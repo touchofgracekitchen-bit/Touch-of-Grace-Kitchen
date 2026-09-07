@@ -5127,33 +5127,32 @@ function AccountsTab({
       return 1001;
     }
   });
-  const [pmtAmount, setPmtAmount] = useState("");
-  const [pmtMethod, setPmtMethod] = useState("Transfer");
+  const [pmtMethod, setPmtMethod] = useState("Cash");
   const [pmtNote, setPmtNote] = useState("");
   const [pmtSaved, setPmtSaved] = useState(false);
+  const [selOrderIds, setSelOrderIds] = useState([]);
+
+  // Money now flows through ONE place: the sales/orders themselves.
+  // An account's "pending" orders are simply sales tied to it that are
+  // still marked on-account. Once you settle them, they flip to a normal
+  // paid sale — same as any POS transaction — so EOD, Transactions, and
+  // the account balance can never disagree with each other.
   const onAccountOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "on-account");
-  const pendingOrders = acc => onAccountOrders(acc).filter(s => !s.invoiced);
-  const totalPayments = acc => (acc.payments || []).reduce((s, p) => s + p.amount, 0);
-  const totalOwed = acc => {
-    const ordersCents = Math.round(onAccountOrders(acc).reduce((s, o) => s + o.total, 0) * 100);
-    const paidCents = Math.round(totalPayments(acc) * 100);
-    return Math.max(0, ordersCents - paidCents) / 100;
-  };
+  const settledOrders = acc => sales.filter(s => s.accountId === acc.id && s.paymentStatus === "paid");
+  const pendingOrders = acc => onAccountOrders(acc);
+  const totalOwed = acc => onAccountOrders(acc).reduce((s, o) => s + o.total, 0);
+  const totalPayments = acc => settledOrders(acc).reduce((s, o) => s + o.total, 0);
+  const selectedTotal = () => onAccountOrders(acc || {}).filter(o => selOrderIds.includes(o.id)).reduce((s, o) => s + o.total, 0);
   const recordPayment = () => {
-    if (!acc || !pmtAmount) return;
-    const pmt = {
-      id: Date.now(),
-      date: today(),
-      time: nowStr(),
-      amount: parseFloat(pmtAmount) || 0,
-      method: pmtMethod,
-      note: pmtNote
-    };
-    setAccounts(accounts.map(a => a.id === selected ? {
-      ...a,
-      payments: [...(a.payments || []), pmt]
-    } : a));
-    setPmtAmount("");
+    if (!acc || selOrderIds.length === 0) return;
+    setSales(prevSales => prevSales.map(s => selOrderIds.includes(s.id) ? {
+      ...s,
+      paymentStatus: "paid",
+      payMethod: pmtMethod,
+      paymentNote: pmtNote || undefined,
+      settledDate: today()
+    } : s));
+    setSelOrderIds([]);
     setPmtNote("");
     setPmtSaved(true);
     setTimeout(() => setPmtSaved(false), 3000);
@@ -5179,8 +5178,7 @@ function AccountsTab({
   };
   const acc = selected ? accounts.find(a => a.id === selected) : null;
   const accOrders = acc ? onAccountOrders(acc) : [];
-  const allPayments = acc ? acc.payments || [] : [];
-  const totalPaid = allPayments.reduce((s, p) => s + p.amount, 0);
+  const totalPaid = acc ? totalPayments(acc) : 0;
   const invoiceOrders = acc ? accOrders.filter(s => s.date >= invoiceRange.from && s.date <= invoiceRange.to) : [];
   const invoiceTotal = invoiceOrders.reduce((s, o) => s + o.total, 0);
   return /*#__PURE__*/React.createElement("div", {
@@ -5643,7 +5641,7 @@ function AccountsTab({
     style: {
       background: C.green
     }
-  }, ["Date", "Time", "Order #", "Items", "Total", "Status"].map(h => /*#__PURE__*/React.createElement("th", {
+  }, ["Date", "Time", "Order #", "Items", "Total", "Status", ""].map(h => /*#__PURE__*/React.createElement("th", {
     key: h,
     style: {
       color: C.white,
@@ -5652,13 +5650,13 @@ function AccountsTab({
       fontSize: 12
     }
   }, h)))), /*#__PURE__*/React.createElement("tbody", null, accOrders.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
-    colSpan: 6,
+    colSpan: 7,
     style: {
       padding: 20,
       textAlign: "center",
       color: C.gray
     }
-  }, "No orders on this account yet. Place an order in POS and select \"On Account\".")) : accOrders.sort((a, b) => b.date.localeCompare(a.date)).map((o, i) => /*#__PURE__*/React.createElement("tr", {
+  }, "No unpaid orders on this account. Place an order in POS and select \"On Account\", or use \"+ Place Order\" above.")) : accOrders.sort((a, b) => b.date.localeCompare(a.date)).map((o, i) => /*#__PURE__*/React.createElement("tr", {
     key: o.id,
     style: {
       background: i % 2 === 0 ? C.white : C.cream,
@@ -5693,51 +5691,21 @@ function AccountsTab({
     style: {
       padding: "8px 14px"
     }
-  }, (() => {
-    const chron = [...accOrders].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-    let remaining = Math.round(totalPayments(acc) * 100);
-    let isSettled = false;
-    for (const ord of chron) {
-      const ordCents = Math.round(ord.total * 100);
-      if (remaining >= ordCents) {
-        remaining -= ordCents;
-        if (ord.id === o.id) isSettled = true;
-      } else {
-        if (ord.id === o.id) isSettled = false;
-        break;
-      }
-    }
-    return /*#__PURE__*/React.createElement(Badge, {
-      color: isSettled ? C.green : C.orange
-    }, isSettled ? "Settled" : "Pending");
-  })()), /*#__PURE__*/React.createElement("td", {
+  }, /*#__PURE__*/React.createElement(Badge, {
+    color: C.orange
+  }, "Pending")), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "8px 14px"
     }
-  }, !(() => {
-    const chron = [...accOrders].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-    let remaining = Math.round(totalPayments(acc) * 100);
-    let settled = false;
-    for (const ord of chron) {
-      const c = Math.round(ord.total * 100);
-      if (remaining >= c) {
-        remaining -= c;
-        if (ord.id === o.id) settled = true;
-      } else {
-        if (ord.id === o.id) settled = false;
-        break;
-      }
-    }
-    return settled;
-  })() && /*#__PURE__*/React.createElement(Btn, {
+  }, /*#__PURE__*/React.createElement(Btn, {
     small: true,
     onClick: () => {
-      if (!window.confirm("Cancel order #" + o.orderNumber + " for " + fmt(o.total) + "? Use this only if the order was placed by mistake — not to remove a real charge.")) return;
+      if (!window.confirm("Cancel order #" + o.orderNumber + " for " + fmt(o.total) + "? Use this only if the order was placed by mistake — not to remove a real charge. To settle a real order, use \"Record Payment\" instead.")) return;
       setSales(prevSales => prevSales.filter(s => s.id !== o.id));
     },
     color: C.red,
     outline: true
-  }, "Cancel"))))))), view === "payment" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Record Payment from ", acc.name), /*#__PURE__*/React.createElement("div", {
+  }, "Cancel"))))))), view === "payment" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Settle Orders for ", acc.name), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#E8F5E9",
       borderRadius: 8,
@@ -5745,7 +5713,7 @@ function AccountsTab({
       marginBottom: 16,
       fontSize: 13
     }
-  }, "When this account sends a payment (e-transfer, cheque, cash), record it here. It will show in End of Day as collected revenue."), pmtSaved && /*#__PURE__*/React.createElement("div", {
+  }, "Tick the orders ", acc.name, " is paying for. The total updates automatically — pick how they paid, then confirm. Those orders become normal paid transactions, exactly like a POS sale, so they show correctly in End of Day."), pmtSaved && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#E8F5E9",
       border: "1px solid " + C.green,
@@ -5756,7 +5724,91 @@ function AccountsTab({
       color: C.green,
       textAlign: "center"
     }
-  }, "Payment recorded!"), /*#__PURE__*/React.createElement("div", {
+  }, "Payment recorded — orders marked paid!"), pendingOrders(acc).length === 0 ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: C.gray,
+      textAlign: "center",
+      padding: 20
+    }
+  }, "No unpaid orders on this account.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: C.green
+    }
+  }, ["", "Date", "Order #", "Items", "Total"].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      color: C.white,
+      padding: "8px 12px",
+      textAlign: "left",
+      fontSize: 12
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, [...pendingOrders(acc)].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).map((o, i) => /*#__PURE__*/React.createElement("tr", {
+    key: o.id,
+    style: {
+      background: selOrderIds.includes(o.id) ? C.lightGold : i % 2 === 0 ? C.white : C.cream,
+      borderBottom: "1px solid " + C.border,
+      cursor: "pointer"
+    },
+    onClick: () => setSelOrderIds(prev => prev.includes(o.id) ? prev.filter(id => id !== o.id) : [...prev, o.id])
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: selOrderIds.includes(o.id),
+    onChange: () => {},
+    style: {
+      width: 16,
+      height: 16
+    }
+  })), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px"
+    }
+  }, o.date), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px",
+      fontWeight: 700
+    }
+  }, "#", o.orderNumber), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px",
+      fontSize: 12
+    }
+  }, o.items.map(x => x.qty + "x " + x.name).join(", ")), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px",
+      fontWeight: 700
+    }
+  }, fmt(o.total)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.lightGold,
+      borderRadius: 8,
+      padding: 14,
+      marginBottom: 14,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700
+    }
+  }, selOrderIds.length, " order", selOrderIds.length !== 1 ? "s" : "", " selected"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 18,
+      color: C.green
+    }
+  }, fmt(selectedTotal()))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -5770,27 +5822,11 @@ function AccountsTab({
       display: "block",
       marginBottom: 4
     }
-  }, "Amount Received (CAD)"), /*#__PURE__*/React.createElement(Inp, {
-    type: "number",
-    value: pmtAmount,
-    onChange: setPmtAmount,
-    placeholder: "0.00"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      display: "block",
-      marginBottom: 4
-    }
-  }, "Payment Method"), /*#__PURE__*/React.createElement(Sel, {
+  }, "Paid Via"), /*#__PURE__*/React.createElement(Sel, {
     value: pmtMethod,
     onChange: setPmtMethod,
     options: ["Cash", "Card Machine", "Transfer"]
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("label", {
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     style: {
       fontSize: 12,
       fontWeight: 700,
@@ -5800,14 +5836,18 @@ function AccountsTab({
   }, "Reference / Note (optional)"), /*#__PURE__*/React.createElement(Inp, {
     value: pmtNote,
     onChange: setPmtNote,
-    placeholder: "e.g. e-transfer ref #123, invoice #4 payment..."
-  })), /*#__PURE__*/React.createElement(Btn, {
+    placeholder: "e.g. e-transfer ref #123"
+  }))), /*#__PURE__*/React.createElement(Btn, {
     onClick: recordPayment,
+    disabled: selOrderIds.length === 0,
     style: {
-      width: "100%",
-      marginBottom: 16
+      width: "100%"
     }
-  }, "Record Payment of ", pmtAmount ? fmt(pmtAmount) : "$0.00"), allPayments.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SH, null, "Payment History"), /*#__PURE__*/React.createElement("table", {
+  }, "Confirm Payment of ", fmt(selectedTotal()), " — ", selOrderIds.length, " order", selOrderIds.length !== 1 ? "s" : "")), settledOrders(acc).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 24
+    }
+  }, /*#__PURE__*/React.createElement(SH, null, "Payment History"), /*#__PURE__*/React.createElement("table", {
     style: {
       width: "100%",
       borderCollapse: "collapse",
@@ -5817,7 +5857,7 @@ function AccountsTab({
     style: {
       background: C.green
     }
-  }, ["Date", "Amount", "Method", "Note", ""].map(h => /*#__PURE__*/React.createElement("th", {
+  }, ["Date", "Order #", "Amount", "Method", "Note"].map(h => /*#__PURE__*/React.createElement("th", {
     key: h,
     style: {
       color: C.white,
@@ -5825,8 +5865,8 @@ function AccountsTab({
       textAlign: "left",
       fontSize: 12
     }
-  }, h)))), /*#__PURE__*/React.createElement("tbody", null, [...allPayments].reverse().map((p, i) => /*#__PURE__*/React.createElement("tr", {
-    key: p.id,
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, [...settledOrders(acc)].sort((a, b) => (b.settledDate || b.date).localeCompare(a.settledDate || a.date)).map((o, i) => /*#__PURE__*/React.createElement("tr", {
+    key: o.id,
     style: {
       background: i % 2 === 0 ? C.white : C.cream,
       borderBottom: "1px solid " + C.border
@@ -5835,43 +5875,33 @@ function AccountsTab({
     style: {
       padding: "8px 12px"
     }
-  }, p.date), /*#__PURE__*/React.createElement("td", {
+  }, o.settledDate || o.date), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 12px",
+      fontWeight: 700
+    }
+  }, "#", o.orderNumber), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "8px 12px",
       fontWeight: 700,
       color: C.green
     }
-  }, fmt(p.amount)), /*#__PURE__*/React.createElement("td", {
+  }, fmt(o.total)), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "8px 12px"
     }
-  }, p.method), /*#__PURE__*/React.createElement("td", {
+  }, o.payMethod), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "8px 12px",
       fontSize: 12,
       color: C.charcoal
     }
-  }, p.note || "--"), /*#__PURE__*/React.createElement("td", {
-    style: {
-      padding: "8px 12px"
-    }
-  }, /*#__PURE__*/React.createElement(Btn, {
-    small: true,
-    onClick: () => {
-      if (!window.confirm("Delete this payment of " + fmt(p.amount) + "? This will increase the account balance owed.")) return;
-      setAccounts(accounts.map(a => a.id === acc.id ? {
-        ...a,
-        payments: (a.payments || []).filter(x => x.id !== p.id)
-      } : a));
-    },
-    color: C.red,
-    outline: true
-  }, "Delete"))))), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
+  }, o.paymentNote || "--")))), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
     style: {
       background: C.lightGold
     }
   }, /*#__PURE__*/React.createElement("td", {
-    colSpan: 1,
+    colSpan: 2,
     style: {
       padding: "9px 12px",
       fontWeight: 700
@@ -5882,8 +5912,8 @@ function AccountsTab({
       fontWeight: 800,
       color: C.green
     }
-  }, fmt(totalPaid)), /*#__PURE__*/React.createElement("td", {
-    colSpan: 3
+  }, fmt(totalPayments(acc))), /*#__PURE__*/React.createElement("td", {
+    colSpan: 2
   })))))), view === "invoice" && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(SH, null, "Generate Invoice for ", acc.name), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -7440,23 +7470,25 @@ function EODTab({
   const [refundPin, setRefundPin] = useState(null); // pending refund needing PIN
 
   // Only PAID sales count for EOD balancing (On Account is deferred)
-  const allDay = sales.filter(s => s.date === selDate);
-  const paidDay = allDay.filter(s => s.paymentStatus !== "on-account");
-  const deferredDay = allDay.filter(s => s.paymentStatus === "on-account");
+  // Revenue belongs to the day the MONEY arrived, not the day the order
+  // was placed. An immediate sale is recognized on its order date. An
+  // order that was on-account and later settled is recognized on its
+  // settledDate — the day the cash actually came in — even if the order
+  // itself was placed days earlier.
+  const paidDay = sales.filter(s => s.paymentStatus === "paid" && (s.settledDate ? s.settledDate === selDate : s.date === selDate));
+  const deferredDay = sales.filter(s => s.paymentStatus === "on-account" && s.date === selDate);
   const dayRefunds = (refunds || []).filter(r => r.date === selDate);
 
   // Account payments received today
-  const dayAccPmts = (accounts || []).flatMap(a => (a.payments || []).filter(p => p.date === selDate));
-  const accPmtTotal = dayAccPmts.reduce((s, p) => s + p.amount, 0);
+  // Catering deposits still use their own simple payment log (one-off
+  // event invoices, not per-order tickets like Accounts). Account money
+  // now flows through the orders themselves (paidDay above), so it needs
+  // no separate folding here anymore.
   const dayCatPmts = (cateringEvents || []).flatMap(e => (e.payments || []).filter(p => p.date === selDate));
   const catPmtTotal = dayCatPmts.reduce((s, p) => s + p.amount, 0);
-
-  // Every dollar collected today, regardless of which tab it came from
-  // (POS, Accounts, or Catering), is folded into exactly one of 3 buckets:
-  // Cash, Card Machine, or Transfer. "On Account" is a status, never a bucket.
-  const posCash = paidDay.filter(s => s.payMethod === "Cash").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Cash").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Cash").reduce((s, p) => s + p.amount, 0);
-  const posCard = paidDay.filter(s => s.payMethod === "Card Machine").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Card Machine").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Card Machine").reduce((s, p) => s + p.amount, 0);
-  const posTransf = paidDay.filter(s => s.payMethod === "Transfer").reduce((s, x) => s + x.total, 0) + dayAccPmts.filter(p => p.method === "Transfer").reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => p.method === "Transfer").reduce((s, p) => s + p.amount, 0);
+  const posCash = paidDay.filter(s => s.payMethod === "Cash").reduce((s, x) => s + x.total, 0) + dayCatPmts.filter(p => p.method === "Cash").reduce((s, p) => s + p.amount, 0);
+  const posCard = paidDay.filter(s => s.payMethod === "Card Machine").reduce((s, x) => s + x.total, 0) + dayCatPmts.filter(p => p.method === "Card Machine").reduce((s, p) => s + p.amount, 0);
+  const posTransf = paidDay.filter(s => s.payMethod === "Transfer").reduce((s, x) => s + x.total, 0) + dayCatPmts.filter(p => p.method === "Transfer").reduce((s, p) => s + p.amount, 0);
   const posTotal = posCash + posCard + posTransf;
   const posGST = paidDay.reduce((s, x) => s + x.gst, 0);
   const posPST = paidDay.reduce((s, x) => s + x.pst, 0);
@@ -7484,7 +7516,6 @@ function EODTab({
       posCash,
       posCard,
       posTransf,
-      accPmtTotal,
       cashCounted: parseFloat(cashCounted || 0),
       cardTotal: parseFloat(cardTotal || 0),
       transferTotal: parseFloat(transferTotal || 0),
@@ -7725,7 +7756,7 @@ function EODTab({
     style: {
       background: C.lightGold
     }
-  }, /*#__PURE__*/React.createElement(SH, null, "Collected Revenue (", selDate, ")"), paidDay.length === 0 && accPmtTotal === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(SH, null, "Collected Revenue (", selDate, ")"), paidDay.length === 0 && catPmtTotal === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       color: C.charcoal,
       fontSize: 13,
@@ -7756,14 +7787,14 @@ function EODTab({
     }
   }, /*#__PURE__*/React.createElement("span", null, "Transfer"), /*#__PURE__*/React.createElement("strong", null, fmt(posTransf))), (() => {
     const known = ["Cash", "Card Machine", "Transfer"];
-    const leftover = dayAccPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0) + dayCatPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0);
+    const leftover = dayCatPmts.filter(p => !known.includes(p.method)).reduce((s, p) => s + p.amount, 0);
     return leftover > 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         justifyContent: "space-between",
         color: C.red
       }
-    }, /*#__PURE__*/React.createElement("span", null, "Unlabeled payment — check Accounts/Catering"), /*#__PURE__*/React.createElement("strong", null, fmt(leftover))) : null;
+    }, /*#__PURE__*/React.createElement("span", null, "Unlabeled catering payment — check Catering tab"), /*#__PURE__*/React.createElement("strong", null, fmt(leftover))) : null;
   })(), /*#__PURE__*/React.createElement("hr", {
     style: {
       border: "1px solid " + C.border,
